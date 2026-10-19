@@ -120,18 +120,12 @@
             <div class="input-group">
                 <input type="text" id="login-user" class="sparkle-input" placeholder="Username" required autocomplete="off">
             </div>
-            <div class="input-group">
-                <input type="password" id="login-pass" class="sparkle-input" placeholder="Password" required>
-            </div>
             <button onclick="login()">Sign In</button>
         </div>
 
         <div id="form-register" class="form-container">
             <div class="input-group">
                 <input type="text" id="reg-user" class="sparkle-input" placeholder="Username" required autocomplete="off">
-            </div>
-            <div class="input-group">
-                <input type="password" id="reg-pass" class="sparkle-input" placeholder="Password" required>
             </div>
             <button onclick="register()">Create Account</button>
         </div>
@@ -267,42 +261,33 @@
             document.getElementById('loader').classList.add('hidden');
         }
 
-        // Анонимная регистрация (без Email)
         window.register = async function() {
             const username = document.getElementById('reg-user').value.trim();
-            const pass = document.getElementById('reg-pass').value;
             if (username.length < 3) return showMsg("Username must be at least 3 chars");
-            if (pass.length < 6) return showMsg("Password must be at least 6 chars");
 
-            // Создаем анонимного юзера в Supabase
-            const { data, error } = await dbClient.auth.signInAnonymously();
-            if (error) return showMsg(error.message);
+            // Создаем аккаунт
+            const { data, error } = await dbClient.rpc('register_user', { p_username: username });
+            if (error) return showMsg("Database error");
+            if (!data || !data.ok) return showMsg(data.error || "Error");
 
-            // Сохраняем ник и пароль прямо в метаданные юзера
-            await dbClient.auth.updateUser({ data: { username: username, password: pass } });
-            
-            // Обновляем профиль (сохраняем ник в базу)
-            await dbClient.rpc('create_profile', { p_username: username });
-
-            showMsg("Account created successfully", "success");
-            setTimeout(() => { checkAuth(); }, 800);
+            // Автоматически логинимся
+            document.getElementById('login-user').value = username;
+            login();
         };
 
-        // Вход (тоже анонимный, ищем по нику)
         window.login = async function() {
             document.getElementById('loader').classList.remove('hidden');
             const username = document.getElementById('login-user').value.trim();
-            const pass = document.getElementById('login-pass').value;
 
-            // Ищем юзера по нику через нашу функцию в базе
-            const { data, error } = await dbClient.rpc('login_user', { p_username: username, p_password: pass });
+            // Ищем юзера и получаем токен для входа
+            const { data, error } = await dbClient.rpc('login_user', { p_username: username });
             
             if (error || !data || !data.ok) {
                 document.getElementById('loader').classList.add('hidden');
-                return showMsg("Invalid username or password");
+                return showMsg("User not found");
             }
 
-            // Если нашли — восстанавливаем анонимную сессию по его токену
+            // Ставим сессию
             const { error: authErr } = await dbClient.auth.setSession({
                 access_token: data.access_token,
                 refresh_token: data.refresh_token
@@ -319,7 +304,7 @@
             document.getElementById('loader').classList.remove('hidden');
             await dbClient.auth.signOut();
             checkAuth();
-            document.getElementById('hwid-input').value = ''; document.getElementById('login-pass').value = '';
+            document.getElementById('hwid-input').value = ''; document.getElementById('login-user').value = '';
         };
 
         window.bindHwid = async function() {
