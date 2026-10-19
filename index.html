@@ -177,8 +177,9 @@
         const { createClient } = supabase;
         const dbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Исправленный домен для прохождения валидации Supabase
         function toEmail(username) {
-            return username.toLowerCase().replace(/[^a-z0-9]/g, '') + "@local.host";
+            return username.toLowerCase().replace(/[^a-z0-9]/g, '') + "@gmail.com";
         }
 
         // --- Эффекты ---
