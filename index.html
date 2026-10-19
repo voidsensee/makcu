@@ -22,6 +22,31 @@
         #sparkles-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; pointer-events: none; }
         #particles-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
+        /* --- ПРЕЛОАДЕР --- */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 1000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+        .loader-spinner {
+            width: 50px; height: 50px; border: 3px solid rgba(168, 85, 247, 0.2);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-title {
+            font-size: 24px; font-weight: 600; letter-spacing: 2px; color: var(--text);
+            margin-bottom: 10px; text-transform: lowercase;
+        }
+        .loader-sub {
+            font-size: 14px; font-weight: 500; letter-spacing: 4px; color: var(--accent);
+            text-transform: uppercase; animation: blink 1.5s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+        /* --- ОСНОВНАЯ КАРТОЧКА --- */
         .glass-card {
             background: var(--glass-bg); backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%);
             border: 1px solid var(--glass-border); border-radius: 24px; padding: 45px 40px; width: 100%; max-width: 380px;
@@ -81,6 +106,13 @@
     </style>
 </head>
 <body>
+    <!-- ЗАГРУЗЧИК -->
+    <div id="loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-title">makcu</div>
+        <div class="loader-sub">Activate</div>
+    </div>
+
     <canvas id="particles-canvas"></canvas>
     <canvas id="sparkles-canvas"></canvas>
 
@@ -129,6 +161,12 @@
             </div>
 
             <div id="sub-info" class="sub-info"></div>
+            
+            <!-- Кнопка админа -->
+            <button id="admin-btn" onclick="window.location.href='admin.html'" style="display: none; background: linear-gradient(135deg, #3b0764 0%, #7e22ce 100%); border: 1px solid #a855f7; margin-top: 15px;">
+                Админ-панель
+            </button>
+
             <button onclick="logout()" class="secondary">Log Out</button>
         </div>
     </div>
@@ -191,6 +229,7 @@
             clearTimeout(showMsg._t); showMsg._t = setTimeout(() => { box.className = 'msg'; }, 5000);
         }
         function clearMsg() { document.getElementById('msg-box').className = 'msg'; }
+        
         function toggleDashboardView(hasHwid) {
             document.getElementById('hwid-section').style.display = hasHwid ? 'none' : 'block';
             document.getElementById('download-area').style.display = hasHwid ? 'block' : 'none';
@@ -198,6 +237,14 @@
 
         function renderDashboard(d) {
             const subInfo = document.getElementById('sub-info'), dlArea = document.getElementById('download-area'), label = document.getElementById('access-label');
+            const adminBtn = document.getElementById('admin-btn');
+
+            if (d.role === 'admin') {
+                adminBtn.style.display = 'block';
+            } else {
+                adminBtn.style.display = 'none';
+            }
+
             if (d.is_banned) {
                 document.getElementById('hwid-section').style.display = 'none'; dlArea.style.display = 'none';
                 subInfo.innerText = 'Аккаунт забанен: ' + (d.ban_reason || ''); subInfo.style.color = '#fca5a5'; return;
@@ -219,6 +266,7 @@
 
         async function checkAuth() {
             const { data: { session } } = await dbClient.auth.getSession();
+            
             if (session) {
                 document.getElementById('tabs-container').classList.add('hidden');
                 document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
@@ -233,6 +281,8 @@
                 toggleDashboardView(false);
                 switchTab('login', 0);
             }
+            // Скрываем прелоадер после проверки
+            document.getElementById('loader').classList.add('hidden');
         }
 
         window.register = async function() {
@@ -249,15 +299,20 @@
         };
 
         window.login = async function() {
+            document.getElementById('loader').classList.remove('hidden'); // Показываем загрузчик при входе
             const username = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value;
             const email = toEmail(username);
             const { error } = await dbClient.auth.signInWithPassword({ email, password: pass });
-            if (error) return showMsg("Invalid username or password");
+            if (error) {
+                document.getElementById('loader').classList.add('hidden');
+                return showMsg("Invalid username or password");
+            }
             checkAuth();
         };
 
         window.logout = async function() {
+            document.getElementById('loader').classList.remove('hidden'); // Показываем загрузчик при выходе
             await dbClient.auth.signOut();
             checkAuth();
             document.getElementById('hwid-input').value = ''; document.getElementById('login-pass').value = '';
