@@ -9,56 +9,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --bg: #030006; --glass-bg: rgba(12, 5, 20, 0.4); --glass-border: rgba(168, 85, 247, 0.15);
-            --accent: #a855f7; --text: #f8f8fa; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.4); --font-sans: 'Inter', sans-serif;
-        }
+        :root { --bg: #030006; --glass-bg: rgba(12, 5, 20, 0.4); --glass-border: rgba(168, 85, 247, 0.15); --accent: #a855f7; --text: #f8f8fa; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.4); --font-sans: 'Inter', sans-serif; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: var(--bg); color: var(--text); font-family: var(--font-sans);
-            min-height: 100vh; display: flex; justify-content: center; align-items: center;
-            overflow: hidden; position: relative; background-image: radial-gradient(circle at 50% 0%, #150726 0%, var(--bg) 70%);
-        }
+        body { background-color: var(--bg); color: var(--text); font-family: var(--font-sans); min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; background-image: radial-gradient(circle at 50% 0%, #150726 0%, var(--bg) 70%); }
         #sparkles-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; pointer-events: none; }
         #particles-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 1000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.6s ease, visibility 0.6s;
-        }
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease, visibility 0.6s; }
         #loader.hidden { opacity: 0; visibility: hidden; }
-        .loader-spinner {
-            width: 50px; height: 50px; border: 3px solid rgba(168, 85, 247, 0.2);
-            border-top-color: var(--accent); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
-        }
+        .loader-spinner { width: 50px; height: 50px; border: 3px solid rgba(168, 85, 247, 0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loader-title { font-size: 24px; font-weight: 600; letter-spacing: 2px; color: var(--text); margin-bottom: 10px; text-transform: lowercase; }
         .loader-sub { font-size: 14px; font-weight: 500; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; animation: blink 1.5s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
-        .glass-card {
-            background: var(--glass-bg); backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%);
-            border: 1px solid var(--glass-border); border-radius: 24px; padding: 45px 40px; width: 100%; max-width: 380px;
-            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05), inset 0 -1px 1px rgba(0, 0, 0, 0.5);
-            position: relative; z-index: 1; animation: cardIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(30px) scale(0.98);
-        }
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%); border: 1px solid var(--glass-border); border-radius: 24px; padding: 45px 40px; width: 100%; max-width: 380px; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05), inset 0 -1px 1px rgba(0, 0, 0, 0.5); position: relative; z-index: 1; animation: cardIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(30px) scale(0.98); }
         @keyframes cardIn { to { opacity: 1; transform: translateY(0) scale(1); } }
         .glass-card::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.6; }
         
         .tabs { display: flex; margin-bottom: 30px; background: rgba(0, 0, 0, 0.5); border-radius: 12px; padding: 5px; position: relative; box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.6); }
-        .tab-indicator {
-            position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc(50% - 5px);
-            background: linear-gradient(180deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.1)); border: 1px solid rgba(168, 85, 247, 0.3);
-            border-radius: 8px; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05); z-index: 1;
-        }
+        .tab-indicator { position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc(50% - 5px); background: linear-gradient(180deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.1)); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05); z-index: 1; }
         .tab-indicator.right { transform: translateX(100%); }
-        .tab {
-            flex: 1; text-align: center; padding: 12px; cursor: pointer; font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
-            color: var(--text-dim); transition: color 0.3s; position: relative; z-index: 2; user-select: none; text-transform: uppercase;
-        }
+        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; font-size: 13px; font-weight: 500; letter-spacing: 0.5px; color: var(--text-dim); transition: color 0.3s; position: relative; z-index: 2; user-select: none; text-transform: uppercase; }
         .tab.active { color: var(--text); }
         .tab:hover:not(.active) { color: rgba(255, 255, 255, 0.7); }
 
@@ -66,19 +38,11 @@
         .form-container.active { display: block; }
         @keyframes fadeSlide { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .input-group { margin-bottom: 18px; position: relative; }
-        input {
-            width: 100%; padding: 16px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px; color: var(--text); font-size: 14px; font-family: var(--font-sans); outline: none;
-            transition: all 0.3s ease; box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
+        input { width: 100%; padding: 16px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; color: var(--text); font-size: 14px; font-family: var(--font-sans); outline: none; transition: all 0.3s ease; box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3); }
         input::placeholder { color: rgba(255, 255, 255, 0.15); letter-spacing: 0.5px; }
         input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.6); box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1), inset 0 4px 8px rgba(0, 0, 0, 0.3); }
         
-        button {
-            width: 100%; padding: 16px; border: none; border-radius: 12px; background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%);
-            color: white; font-weight: 600; font-size: 14px; font-family: var(--font-sans); letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.4); margin-top: 10px;
-        }
+        button { width: 100%; padding: 16px; border: none; border-radius: 12px; background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%); color: white; font-weight: 600; font-size: 14px; font-family: var(--font-sans); letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.4); margin-top: 10px; }
         button::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent); transform: skewX(-25deg); transition: 0.6s; }
         button:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 15px 35px -5px rgba(168, 85, 247, 0.6); }
         button:hover::before { left: 150%; }
@@ -98,11 +62,7 @@
     </style>
 </head>
 <body>
-    <div id="loader">
-        <div class="loader-spinner"></div>
-        <div class="loader-title">makcu</div>
-        <div class="loader-sub">Activate</div>
-    </div>
+    <div id="loader"><div class="loader-spinner"></div><div class="loader-title">makcu</div><div class="loader-sub">Activate</div></div>
 
     <canvas id="particles-canvas"></canvas>
     <canvas id="sparkles-canvas"></canvas>
@@ -161,39 +121,21 @@
         const { createClient } = supabase;
         const dbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Эффекты
-        const bgCanvas = document.getElementById('particles-canvas');
-        const bgCtx = bgCanvas.getContext('2d');
-        let w, h, bgParticles = [];
-        function resizeBg() { w = bgCanvas.width = window.innerWidth; h = bgCanvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeBg); resizeBg();
-        class BgParticle {
-            constructor() { this.reset(); this.y = Math.random() * h; }
-            reset() { this.x = Math.random() * w; this.y = -20; this.size = Math.random() * 3 + 1; this.speedY = Math.random() * 0.6 + 0.2; this.speedX = Math.random() * 0.4 - 0.2; this.opacity = Math.random() * 0.4 + 0.05; }
-            update() { this.y += this.speedY; this.x += this.speedX; if (this.y > h + 20) this.reset(); }
-            draw() { bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fillStyle = `rgba(168, 85, 247, ${this.opacity})`; bgCtx.shadowBlur = 10; bgCtx.shadowColor = 'rgba(168, 85, 247, 0.5)'; bgCtx.fill(); }
-        }
-        for (let i = 0; i < 80; i++) bgParticles.push(new BgParticle());
-        function animateBg() { bgCtx.clearRect(0, 0, w, h); bgParticles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateBg); }
-        animateBg();
+        // Эффекты (сокращены для читаемости)
+        const bgCanvas = document.getElementById('particles-canvas'); const bgCtx = bgCanvas.getContext('2d'); let w, h, bgParticles = [];
+        function resizeBg() { w = bgCanvas.width = window.innerWidth; h = bgCanvas.height = window.innerHeight; } window.addEventListener('resize', resizeBg); resizeBg();
+        class BgParticle { constructor() { this.reset(); this.y = Math.random() * h; } reset() { this.x = Math.random() * w; this.y = -20; this.size = Math.random() * 3 + 1; this.speedY = Math.random() * 0.6 + 0.2; this.speedX = Math.random() * 0.4 - 0.2; this.opacity = Math.random() * 0.4 + 0.05; } update() { this.y += this.speedY; this.x += this.speedX; if (this.y > h + 20) this.reset(); } draw() { bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fillStyle = `rgba(168, 85, 247, ${this.opacity})`; bgCtx.shadowBlur = 10; bgCtx.shadowColor = 'rgba(168, 85, 247, 0.5)'; bgCtx.fill(); } }
+        for (let i = 0; i < 80; i++) bgParticles.push(new BgParticle()); function animateBg() { bgCtx.clearRect(0, 0, w, h); bgParticles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateBg); } animateBg();
 
-        const sparkCanvas = document.getElementById('sparkles-canvas');
-        const sparkCtx = sparkCanvas.getContext('2d');
-        let sw, sh, sparkles = [];
-        function resizeSpark() { sw = sparkCanvas.width = window.innerWidth; sh = sparkCanvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeSpark); resizeSpark();
-        class Sparkle {
-            constructor(x, y) { this.x = x; this.y = y; this.vx = (Math.random() - 0.5) * 6; this.vy = (Math.random() - 0.5) * 6 - 2; this.life = 1.0; this.decay = Math.random() * 0.03 + 0.015; this.size = Math.random() * 2 + 1; this.color = Math.random() > 0.5 ? '168, 85, 247' : '217, 70, 239'; }
-            update() { this.x += this.vx; this.y += this.vy; this.vy += 0.15; this.life -= this.decay; }
-            draw() { sparkCtx.beginPath(); sparkCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); sparkCtx.fillStyle = `rgba(${this.color}, ${this.life})`; sparkCtx.shadowBlur = 15; sparkCtx.shadowColor = `rgba(${this.color}, 0.8)`; sparkCtx.fill(); }
-        }
-        function animateSparks() { sparkCtx.clearRect(0, 0, sw, sh); for (let i = sparkles.length - 1; i >= 0; i--) { let s = sparkles[i]; s.update(); s.draw(); if (s.life <= 0) sparkles.splice(i, 1); } requestAnimationFrame(animateSparks); }
-        animateSparks();
-        document.querySelectorAll('.sparkle-input').forEach(input => {
-            input.addEventListener('input', () => { const rect = input.getBoundingClientRect(); for (let i = 0; i < 3; i++) sparkles.push(new Sparkle(rect.left + Math.random() * rect.width, rect.top + rect.height / 2)); });
-        });
+        const sparkCanvas = document.getElementById('sparkles-canvas'); const sparkCtx = sparkCanvas.getContext('2d'); let sw, sh, sparkles = [];
+        function resizeSpark() { sw = sparkCanvas.width = window.innerWidth; sh = sparkCanvas.height = window.innerHeight; } window.addEventListener('resize', resizeSpark); resizeSpark();
+        class Sparkle { constructor(x, y) { this.x = x; this.y = y; this.vx = (Math.random() - 0.5) * 6; this.vy = (Math.random() - 0.5) * 6 - 2; this.life = 1.0; this.decay = Math.random() * 0.03 + 0.015; this.size = Math.random() * 2 + 1; this.color = Math.random() > 0.5 ? '168, 85, 247' : '217, 70, 239'; } update() { this.x += this.vx; this.y += this.vy; this.vy += 0.15; this.life -= this.decay; } draw() { sparkCtx.beginPath(); sparkCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); sparkCtx.fillStyle = `rgba(${this.color}, ${this.life})`; sparkCtx.shadowBlur = 15; sparkCtx.shadowColor = `rgba(${this.color}, 0.8)`; sparkCtx.fill(); } }
+        function animateSparks() { sparkCtx.clearRect(0, 0, sw, sh); for (let i = sparkles.length - 1; i >= 0; i--) { let s = sparkles[i]; s.update(); s.draw(); if (s.life <= 0) sparkles.splice(i, 1); } requestAnimationFrame(animateSparks); } animateSparks();
+        document.querySelectorAll('.sparkle-input').forEach(input => { input.addEventListener('input', () => { const rect = input.getBoundingClientRect(); for (let i = 0; i < 3; i++) sparkles.push(new Sparkle(rect.left + Math.random() * rect.width, rect.top + rect.height / 2)); }); });
 
-        // Логика UI
+        // Логика
+        let currentUser = null;
+
         window.switchTab = function(tab, index) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab')[index].classList.add('active');
@@ -203,53 +145,32 @@
             clearMsg();
         };
 
-        function showMsg(text, type = 'error') {
-            const box = document.getElementById('msg-box');
-            box.className = `msg ${type}`; box.innerText = text;
-            clearTimeout(showMsg._t); showMsg._t = setTimeout(() => { box.className = 'msg'; }, 5000);
-        }
+        function showMsg(text, type = 'error') { const box = document.getElementById('msg-box'); box.className = `msg ${type}`; box.innerText = text; clearTimeout(showMsg._t); showMsg._t = setTimeout(() => { box.className = 'msg'; }, 5000); }
         function clearMsg() { document.getElementById('msg-box').className = 'msg'; }
-        
-        function toggleDashboardView(hasHwid) {
-            document.getElementById('hwid-section').style.display = hasHwid ? 'none' : 'block';
-            document.getElementById('download-area').style.display = hasHwid ? 'block' : 'none';
-        }
+        function toggleDashboardView(hasHwid) { document.getElementById('hwid-section').style.display = hasHwid ? 'none' : 'block'; document.getElementById('download-area').style.display = hasHwid ? 'block' : 'none'; }
 
         function renderDashboard(d) {
             const subInfo = document.getElementById('sub-info'), dlArea = document.getElementById('download-area'), label = document.getElementById('access-label');
             const adminBtn = document.getElementById('admin-btn');
 
-            if (d.role === 'admin') { adminBtn.style.display = 'block'; } 
-            else { adminBtn.style.display = 'none'; }
+            if (d.role === 'admin') { adminBtn.style.display = 'block'; } else { adminBtn.style.display = 'none'; }
 
-            if (d.is_banned) {
-                document.getElementById('hwid-section').style.display = 'none'; dlArea.style.display = 'none';
-                subInfo.innerText = 'Аккаунт забанен: ' + (d.ban_reason || ''); subInfo.style.color = '#fca5a5'; return;
-            }
+            if (d.is_banned) { document.getElementById('hwid-section').style.display = 'none'; dlArea.style.display = 'none'; subInfo.innerText = 'Аккаунт забанен: ' + (d.ban_reason || ''); subInfo.style.color = '#fca5a5'; return; }
             subInfo.style.color = 'var(--text-dim)';
             if (!d.hwid) { toggleDashboardView(false); subInfo.innerText = 'Привяжи HWID, чтобы получить доступ.'; return; }
             toggleDashboardView(true);
             let subText = d.is_lifetime ? 'Подписка: Lifetime' : (d.subscription_until ? 'Подписка до: ' + new Date(d.subscription_until).toLocaleString() : 'Подписки нет');
-            if (d.active) {
-                label.innerText = 'Access Granted'; label.style.color = 'var(--accent)';
-                dlArea.querySelector('button').disabled = false; dlArea.querySelector('button').style.opacity = '1';
-                subInfo.innerText = subText;
-            } else {
-                label.innerText = 'Подписка истекла'; label.style.color = '#fca5a5';
-                dlArea.querySelector('button').disabled = true; dlArea.querySelector('button').style.opacity = '0.4';
-                subInfo.innerText = subText;
-            }
+            if (d.active) { label.innerText = 'Access Granted'; label.style.color = 'var(--accent)'; dlArea.querySelector('button').disabled = false; dlArea.querySelector('button').style.opacity = '1'; subInfo.innerText = subText; } else { label.innerText = 'Подписка истекла'; label.style.color = '#fca5a5'; dlArea.querySelector('button').disabled = true; dlArea.querySelector('button').style.opacity = '0.4'; subInfo.innerText = subText; }
         }
 
         async function checkAuth() {
-            const { data: { session } } = await dbClient.auth.getSession();
-            
-            if (session) {
+            currentUser = localStorage.getItem('makcu_user');
+            if (currentUser) {
                 document.getElementById('tabs-container').classList.add('hidden');
                 document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
                 document.getElementById('form-dashboard').classList.add('active');
                 
-                const { data } = await dbClient.rpc('get_my_access');
+                const { data } = await dbClient.rpc('get_my_access', { p_user_id: currentUser });
                 if (data && data.ok) renderDashboard(data);
             } else {
                 document.getElementById('tabs-container').classList.remove('hidden');
@@ -265,21 +186,17 @@
             const username = document.getElementById('reg-user').value.trim();
             if (username.length < 3) return showMsg("Username must be at least 3 chars");
 
-            // Создаем аккаунт
             const { data, error } = await dbClient.rpc('register_user', { p_username: username });
             if (error) return showMsg("Database error");
             if (!data || !data.ok) return showMsg(data.error || "Error");
 
-            // Автоматически логинимся
-            document.getElementById('login-user').value = username;
-            login();
+            localStorage.setItem('makcu_user', data.id);
+            checkAuth();
         };
 
         window.login = async function() {
             document.getElementById('loader').classList.remove('hidden');
             const username = document.getElementById('login-user').value.trim();
-
-            // Ищем юзера и получаем токен для входа
             const { data, error } = await dbClient.rpc('login_user', { p_username: username });
             
             if (error || !data || !data.ok) {
@@ -287,22 +204,12 @@
                 return showMsg("User not found");
             }
 
-            // Ставим сессию
-            const { error: authErr } = await dbClient.auth.setSession({
-                access_token: data.access_token,
-                refresh_token: data.refresh_token
-            });
-
-            if (authErr) {
-                document.getElementById('loader').classList.add('hidden');
-                return showMsg("Auth error");
-            }
+            localStorage.setItem('makcu_user', data.id);
             checkAuth();
         };
 
-        window.logout = async function() {
-            document.getElementById('loader').classList.remove('hidden');
-            await dbClient.auth.signOut();
+        window.logout = function() {
+            localStorage.removeItem('makcu_user');
             checkAuth();
             document.getElementById('hwid-input').value = ''; document.getElementById('login-user').value = '';
         };
@@ -310,7 +217,7 @@
         window.bindHwid = async function() {
             const hwid = document.getElementById('hwid-input').value.trim().toUpperCase();
             if (hwid.length < 10) return showMsg("Invalid HWID format");
-            const { data, error } = await dbClient.rpc('bind_hwid', { p_hwid: hwid });
+            const { data, error } = await dbClient.rpc('bind_hwid', { p_user_id: currentUser, p_hwid: hwid });
             if (error) return showMsg("Server error");
             if (!data.ok) {
                 if (data.error === 'banned') return showMsg("Banned: " + (data.reason || ''));
@@ -319,11 +226,10 @@
                 return showMsg("Bind failed: " + data.error);
             }
             showMsg("HWID bound successfully", "success");
-            const { data: d } = await dbClient.rpc('get_my_access');
+            const { data: d } = await dbClient.rpc('get_my_access', { p_user_id: currentUser });
             renderDashboard(d);
         };
 
-        dbClient.auth.onAuthStateChange((event, session) => { checkAuth(); });
         checkAuth();
     </script>
 </body>
