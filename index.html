@@ -7,84 +7,40 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg: #030006;
-            --glass-bg: rgba(12, 5, 20, 0.4);
-            --glass-border: rgba(168, 85, 247, 0.15);
-            --accent: #a855f7;
-            --text: #f8f8fa;
-            --text-dim: #8a8a9e;
-            --input-bg: rgba(0, 0, 0, 0.4);
-            --font-sans: 'Inter', sans-serif;
+            --bg: #030006; --glass-bg: rgba(12, 5, 20, 0.4); --glass-border: rgba(168, 85, 247, 0.15);
+            --accent: #a855f7; --text: #f8f8fa; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.4); --font-sans: 'Inter', sans-serif;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: var(--font-sans);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-            background-image: radial-gradient(circle at 50% 0%, #150726 0%, var(--bg) 70%);
+            background-color: var(--bg); color: var(--text); font-family: var(--font-sans);
+            min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            overflow: hidden; position: relative; background-image: radial-gradient(circle at 50% 0%, #150726 0%, var(--bg) 70%);
         }
         #sparkles-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; pointer-events: none; }
         #particles-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
         .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(30px) saturate(200%);
-            -webkit-backdrop-filter: blur(30px) saturate(200%);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 45px 40px;
-            width: 100%;
-            max-width: 380px;
+            background: var(--glass-bg); backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 45px 40px; width: 100%; max-width: 380px;
             box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05), inset 0 -1px 1px rgba(0, 0, 0, 0.5);
-            position: relative;
-            z-index: 1;
-            animation: cardIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            opacity: 0;
-            transform: translateY(30px) scale(0.98);
+            position: relative; z-index: 1; animation: cardIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(30px) scale(0.98);
         }
         @keyframes cardIn { to { opacity: 1; transform: translateY(0) scale(1); } }
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 15%; right: 15%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0.6;
-        }
-        .tabs {
-            display: flex;
-            margin-bottom: 30px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 12px;
-            padding: 5px;
-            position: relative;
-            box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.6);
-        }
+        .glass-card::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.6; }
+        
+        .tabs { display: flex; margin-bottom: 30px; background: rgba(0, 0, 0, 0.5); border-radius: 12px; padding: 5px; position: relative; box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.6); }
         .tab-indicator {
-            position: absolute;
-            top: 5px; bottom: 5px; left: 5px;
-            width: calc(50% - 5px);
-            background: linear-gradient(180deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.1));
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            border-radius: 8px;
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-            z-index: 1;
+            position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc(50% - 5px);
+            background: linear-gradient(180deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.1)); border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 8px; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05); z-index: 1;
         }
         .tab-indicator.right { transform: translateX(100%); }
         .tab {
-            flex: 1; text-align: center; padding: 12px; cursor: pointer;
-            font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
-            color: var(--text-dim); transition: color 0.3s; position: relative;
-            z-index: 2; user-select: none; text-transform: uppercase;
+            flex: 1; text-align: center; padding: 12px; cursor: pointer; font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+            color: var(--text-dim); transition: color 0.3s; position: relative; z-index: 2; user-select: none; text-transform: uppercase;
         }
         .tab.active { color: var(--text); }
         .tab:hover:not(.active) { color: rgba(255, 255, 255, 0.7); }
@@ -94,54 +50,30 @@
         @keyframes fadeSlide { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .input-group { margin-bottom: 18px; position: relative; }
         input {
-            width: 100%; padding: 16px 18px;
-            background: var(--input-bg);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px; color: var(--text);
-            font-size: 14px; font-family: var(--font-sans); outline: none;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
+            width: 100%; padding: 16px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px; color: var(--text); font-size: 14px; font-family: var(--font-sans); outline: none;
+            transition: all 0.3s ease; box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         input::placeholder { color: rgba(255, 255, 255, 0.15); letter-spacing: 0.5px; }
-        input:focus {
-            border-color: var(--accent);
-            background: rgba(0, 0, 0, 0.6);
-            box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1), inset 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
+        input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.6); box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1), inset 0 4px 8px rgba(0, 0, 0, 0.3); }
+        
         button {
-            width: 100%; padding: 16px; border: none; border-radius: 12px;
-            background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%);
-            color: white; font-weight: 600; font-size: 14px;
-            font-family: var(--font-sans); letter-spacing: 1px;
-            text-transform: uppercase; cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative; overflow: hidden;
-            box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.4);
-            margin-top: 10px;
+            width: 100%; padding: 16px; border: none; border-radius: 12px; background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%);
+            color: white; font-weight: 600; font-size: 14px; font-family: var(--font-sans); letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.4); margin-top: 10px;
         }
-        button::before {
-            content: ''; position: absolute; top: 0; left: -100%;
-            width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-            transform: skewX(-25deg); transition: 0.6s;
-        }
+        button::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent); transform: skewX(-25deg); transition: 0.6s; }
         button:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 15px 35px -5px rgba(168, 85, 247, 0.6); }
         button:hover::before { left: 150%; }
         button:active { transform: translateY(0) scale(0.99); }
-        button.secondary {
-            background: rgba(255, 255, 255, 0.03); box-shadow: none;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            margin-top: 15px; color: var(--text-dim);
-        }
+        
+        button.secondary { background: rgba(255, 255, 255, 0.03); box-shadow: none; border: 1px solid rgba(255, 255, 255, 0.08); margin-top: 15px; color: var(--text-dim); }
         button.secondary:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); box-shadow: none; }
 
-        .msg {
-            font-size: 12px; text-align: center; padding: 12px;
-            border-radius: 10px; margin-bottom: 20px; display: none;
-            animation: fadeSlide 0.3s ease-out; font-weight: 500;
-        }
+        .msg { font-size: 12px; text-align: center; padding: 12px; border-radius: 10px; margin-bottom: 20px; display: none; animation: fadeSlide 0.3s ease-out; font-weight: 500; }
         .msg.error { display: block; background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
         .msg.success { display: block; background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.2); }
+        
         .hidden { display: none !important; }
         .download-block { text-align: center; margin-top: 25px; animation: fadeSlide 0.4s ease-out; }
         .download-block p { color: var(--accent); font-size: 12px; margin-bottom: 12px; font-weight: 500; letter-spacing: 0.5px; }
@@ -161,7 +93,6 @@
 
         <div id="msg-box" class="msg"></div>
 
-        <!-- LOGIN -->
         <div id="form-login" class="form-container active">
             <div class="input-group">
                 <input type="text" id="login-user" class="sparkle-input" placeholder="Username" required autocomplete="off">
@@ -172,7 +103,6 @@
             <button onclick="login()">Sign In</button>
         </div>
 
-        <!-- REGISTER -->
         <div id="form-register" class="form-container">
             <div class="input-group">
                 <input type="text" id="reg-user" class="sparkle-input" placeholder="Username" required autocomplete="off">
@@ -183,7 +113,6 @@
             <button onclick="register()">Create Account</button>
         </div>
 
-        <!-- DASHBOARD -->
         <div id="form-dashboard" class="form-container">
             <div id="hwid-section">
                 <div class="input-group">
@@ -200,49 +129,21 @@
             </div>
 
             <div id="sub-info" class="sub-info"></div>
-
             <button onclick="logout()" class="secondary">Log Out</button>
         </div>
     </div>
 
     <script>
-        const DB = {
-            load() {
-                return {
-                    users: JSON.parse(localStorage.getItem('vs_users') || '[]'),
-                    session: localStorage.getItem('vs_session')
-                };
-            },
-            saveUsers(users) { localStorage.setItem('vs_users', JSON.stringify(users)); },
-            saveSession(u) { u ? localStorage.setItem('vs_session', u) : localStorage.removeItem('vs_session'); }
-        };
+        const SUPABASE_URL = "https://ygvlepfhxmyyquqaasea.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_ZWrKzrdxwja5xLDnrOLUeg_e9tneO0T";
+        const { createClient } = supabase;
+        const dbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function rpc_bind_hwid(username, hwid) {
-            const db = DB.load();
-            const u = db.users.find(x => x.username === username);
-            if (!u) return { ok: false, error: 'no_profile' };
-            if (u.is_banned) return { ok: false, error: 'banned', reason: u.ban_reason };
-            if (u.hwid) return { ok: false, error: 'hwid_already_bound' };
-            if (db.users.some(x => x.hwid === hwid && x.username !== username)) return { ok: false, error: 'hwid_taken' };
-            u.hwid = hwid;
-            u.hwid_bound_at = Date.now();
-            DB.saveUsers(db.users);
-            return { ok: true };
+        function toEmail(username) {
+            return username.toLowerCase().replace(/[^a-z0-9]/g, '') + "@local.host";
         }
 
-        function rpc_get_my_access(username) {
-            const db = DB.load();
-            const u = db.users.find(x => x.username === username);
-            if (!u) return { ok: false, error: 'no_profile' };
-            const active = !!u.is_lifetime || (u.subscription_until && new Date(u.subscription_until) > new Date());
-            return {
-                ok: true, hwid: u.hwid || '', is_banned: !!u.is_banned, ban_reason: u.ban_reason || '',
-                is_lifetime: !!u.is_lifetime, subscription_until: u.subscription_until || null,
-                active: active && !u.is_banned && !!u.hwid
-            };
-        }
-
-        // --- ФОН ---
+        // --- Эффекты ---
         const bgCanvas = document.getElementById('particles-canvas');
         const bgCtx = bgCanvas.getContext('2d');
         let w, h, bgParticles = [];
@@ -258,7 +159,6 @@
         function animateBg() { bgCtx.clearRect(0, 0, w, h); bgParticles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateBg); }
         animateBg();
 
-        // --- ИСКРЫ ---
         const sparkCanvas = document.getElementById('sparkles-canvas');
         const sparkCtx = sparkCanvas.getContext('2d');
         let sw, sh, sparkles = [];
@@ -275,7 +175,7 @@
             input.addEventListener('input', () => { const rect = input.getBoundingClientRect(); for (let i = 0; i < 3; i++) sparkles.push(new Sparkle(rect.left + Math.random() * rect.width, rect.top + rect.height / 2)); });
         });
 
-        // --- UI ---
+        // --- Логика ---
         window.switchTab = function(tab, index) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab')[index].classList.add('active');
@@ -296,9 +196,7 @@
             document.getElementById('download-area').style.display = hasHwid ? 'block' : 'none';
         }
 
-        function renderDashboard(username) {
-            const d = rpc_get_my_access(username);
-            if (!d.ok) return logout();
+        function renderDashboard(d) {
             const subInfo = document.getElementById('sub-info'), dlArea = document.getElementById('download-area'), label = document.getElementById('access-label');
             if (d.is_banned) {
                 document.getElementById('hwid-section').style.display = 'none'; dlArea.style.display = 'none';
@@ -319,65 +217,70 @@
             }
         }
 
-        function enterDashboard(username) {
-            DB.saveSession(username);
-            document.getElementById('tabs-container').classList.add('hidden');
-            document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
-            document.getElementById('form-dashboard').classList.add('active');
-            renderDashboard(username);
+        async function checkAuth() {
+            const { data: { session } } = await dbClient.auth.getSession();
+            if (session) {
+                document.getElementById('tabs-container').classList.add('hidden');
+                document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
+                document.getElementById('form-dashboard').classList.add('active');
+                
+                const { data } = await dbClient.rpc('get_my_access');
+                if (data && data.ok) renderDashboard(data);
+            } else {
+                document.getElementById('tabs-container').classList.remove('hidden');
+                document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
+                document.getElementById('form-login').classList.add('active');
+                toggleDashboardView(false);
+                switchTab('login', 0);
+            }
         }
 
-        window.register = function() {
+        window.register = async function() {
             const username = document.getElementById('reg-user').value.trim();
             const pass = document.getElementById('reg-pass').value;
             if (username.length < 3) return showMsg("Username must be at least 3 chars");
             if (pass.length < 6) return showMsg("Password must be at least 6 chars");
-            const db = DB.load();
-            if (db.users.some(u => u.username.toLowerCase() === username.toLowerCase())) return showMsg("Username already taken");
-            db.users.push({ username, password: pass, hwid: '', is_banned: false, ban_reason: '', is_lifetime: false, subscription_until: null, created_at: Date.now() });
-            DB.saveUsers(db.users);
+
+            const email = toEmail(username);
+            const { error } = await dbClient.auth.signUp({ email, password: pass });
+            if (error) return showMsg(error.message);
             showMsg("Account created successfully", "success");
             setTimeout(() => { switchTab('login', 0); document.getElementById('login-user').value = username; }, 800);
         };
 
-        window.login = function() {
+        window.login = async function() {
             const username = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value;
-            const db = DB.load();
-            const u = db.users.find(x => x.username.toLowerCase() === username.toLowerCase());
-            if (!u || u.password !== pass) return showMsg("Invalid username or password");
-            enterDashboard(u.username);
+            const email = toEmail(username);
+            const { error } = await dbClient.auth.signInWithPassword({ email, password: pass });
+            if (error) return showMsg("Invalid username or password");
+            checkAuth();
         };
 
-        window.logout = function() {
-            DB.saveSession(null);
-            document.getElementById('tabs-container').classList.remove('hidden');
-            document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
-            document.getElementById('form-login').classList.add('active');
-            toggleDashboardView(false); switchTab('login', 0);
+        window.logout = async function() {
+            await dbClient.auth.signOut();
+            checkAuth();
             document.getElementById('hwid-input').value = ''; document.getElementById('login-pass').value = '';
         };
 
-        window.bindHwid = function() {
+        window.bindHwid = async function() {
             const hwid = document.getElementById('hwid-input').value.trim().toUpperCase();
             if (hwid.length < 10) return showMsg("Invalid HWID format");
-            const username = DB.load().session;
-            if (!username) return logout();
-            const r = rpc_bind_hwid(username, hwid);
-            if (!r.ok) {
-                if (r.error === 'banned') return showMsg("Banned: " + (r.reason || ''));
-                if (r.error === 'hwid_taken') return showMsg("HWID already used by another account");
-                if (r.error === 'hwid_already_bound') return showMsg("HWID already bound to this account");
-                return showMsg("Bind failed: " + r.error);
+            const { data, error } = await dbClient.rpc('bind_hwid', { p_hwid: hwid });
+            if (error) return showMsg("Server error");
+            if (!data.ok) {
+                if (data.error === 'banned') return showMsg("Banned: " + (data.reason || ''));
+                if (data.error === 'hwid_taken') return showMsg("HWID already used by another account");
+                if (data.error === 'hwid_already_bound') return showMsg("HWID already bound to this account");
+                return showMsg("Bind failed: " + data.error);
             }
             showMsg("HWID bound successfully", "success");
-            renderDashboard(username);
+            const { data: d } = await dbClient.rpc('get_my_access');
+            renderDashboard(d);
         };
 
-        (function autoLogin() {
-            const s = DB.load().session;
-            if (s && DB.load().users.some(u => u.username === s)) enterDashboard(s);
-        })();
+        dbClient.auth.onAuthStateChange((event, session) => { checkAuth(); });
+        checkAuth();
     </script>
 </body>
 </html>
