@@ -5,24 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>.</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg: #030006; --glass-bg: rgba(12, 5, 20, 0.6); --glass-border: rgba(168, 85, 247, 0.15); --accent: #a855f7; --text: #f8f8fa; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.4); --font-sans: 'Inter', sans-serif; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: var(--bg); color: var(--text); font-family: var(--font-sans);
-            min-height: 100vh; padding: 40px 20px; display: flex; justify-content: center;
-            background-image: radial-gradient(circle at 50% 0%, #150726 0%, var(--bg) 70%);
-        }
-        
+        body { background-color: var(--bg); color: var(--text); font-family: var(--font-sans); min-height: 100vh; padding: 40px 20px; display: flex; justify-content: center; background-image: radial-gradient(circle at 50% 0%, #150726 0%, var(--bg) 70%); }
         .admin-wrapper { width: 100%; max-width: 1100px; animation: fadeIn 0.6s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Шапка */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .logo { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
         .logo::before { content: ''; display: block; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
         
-        /* Статистика */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
         .stat-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; backdrop-filter: blur(20px); }
         .stat-card .label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
@@ -31,7 +25,6 @@
         .stat-card .value.lifetime { color: #d8b4fe; }
         .stat-card .value.banned { color: #fca5a5; }
 
-        /* Панель инструментов */
         .toolbar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
         input { padding: 14px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; color: var(--text); font-family: var(--font-sans); outline: none; transition: 0.3s; }
         input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1); }
@@ -40,13 +33,8 @@
         .btn-gray { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text); }
         .btn-gray:hover { background: rgba(255, 255, 255, 0.1); box-shadow: none; }
 
-        /* Список юзеров */
         .user-list { display: flex; flex-direction: column; gap: 15px; }
-        .user-row {
-            background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px;
-            padding: 20px 25px; backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; gap: 20px;
-            transition: 0.3s;
-        }
+        .user-row { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px 25px; backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; gap: 20px; transition: 0.3s; }
         .user-row:hover { background: rgba(25, 10, 40, 0.7); border-color: rgba(168, 85, 247, 0.3); }
         
         .u-info { flex: 1; min-width: 150px; }
@@ -61,7 +49,6 @@
         .badge.banned { background: rgba(239, 68, 68, 0.3); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.5); }
 
         .u-sub { width: 130px; font-size: 13px; color: var(--text-dim); }
-        
         .u-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
         .btn-sm { padding: 8px 12px; font-size: 12px; border-radius: 8px; }
         .btn-ban { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
@@ -82,7 +69,6 @@
 </head>
 <body>
     <div class="admin-wrapper">
-        
         <div class="header">
             <div class="logo">Admin Panel</div>
             <div style="display: flex; gap: 10px;">
@@ -92,51 +78,58 @@
 
         <div id="msg-box"></div>
 
-        <!-- Статистика -->
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="label">Всего юзеров</div>
-                <div class="value" id="stat-total">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Активных</div>
-                <div class="value active" id="stat-active">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Lifetime</div>
-                <div class="value lifetime" id="stat-lifetime">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Забанено</div>
-                <div class="value banned" id="stat-banned">0</div>
-            </div>
+            <div class="stat-card"><div class="label">Всего юзеров</div><div class="value" id="stat-total">0</div></div>
+            <div class="stat-card"><div class="label">Активных</div><div class="value active" id="stat-active">0</div></div>
+            <div class="stat-card"><div class="label">Lifetime</div><div class="value lifetime" id="stat-lifetime">0</div></div>
+            <div class="stat-card"><div class="label">Забанено</div><div class="value banned" id="stat-banned">0</div></div>
         </div>
 
-        <!-- Инструменты -->
         <div class="toolbar">
             <input type="text" id="search-input" placeholder="Поиск по логину или HWID..." style="flex: 1;" oninput="renderList()">
             <button onclick="generateKey()">Сгенерировать ключ</button>
-            <button class="btn-gray" onclick="renderList()">Обновить</button>
+            <button class="btn-gray" onclick="fetchUsers()">Обновить</button>
         </div>
 
-        <!-- Список -->
-        <div class="user-list" id="user-list">
-            <!-- Рендерится через JS -->
-        </div>
+        <div class="user-list" id="user-list"></div>
     </div>
 
     <script>
+        const SUPABASE_URL = "https://ygvlepfhxmyyquqaasea.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_ZWrKzrdxwja5xLDnrOLUeg_e9tneO0T";
+        const { createClient } = supabase;
+        const dbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let allUsers = [];
+
         function showMsg(text, type = 'success') {
             const box = document.getElementById('msg-box');
             box.className = type; box.innerText = text;
             setTimeout(() => { box.className = ''; box.innerText = ''; }, 3000);
         }
 
-        function getUsers() { return JSON.parse(localStorage.getItem('vs_users') || '[]'); }
-        function saveUsers(users) { localStorage.setItem('vs_users', JSON.stringify(users)); }
+        async function fetchUsers() {
+            // Проверка на админа
+            const { data: authData } = await dbClient.auth.getUser();
+            if (!authData.user) {
+                window.location.href = 'index.html'; return;
+            }
+
+            const { data, error } = await dbClient.rpc('admin_list_users');
+            if (error) {
+                alert("Ошибка доступа. Убедитесь, что вы админ.");
+                window.location.href = 'index.html'; return;
+            }
+            
+            // RPC возвращает массив объектов, но без username. Подтянем его из email
+            allUsers = (data || []).map(u => {
+                const name = u.email ? u.email.split('@')[0] : 'unknown';
+                return { ...u, username: name };
+            });
+            renderList();
+        }
 
         function renderList() {
-            const users = getUsers();
             const search = document.getElementById('search-input').value.toLowerCase();
             const list = document.getElementById('user-list');
             list.innerHTML = '';
@@ -144,7 +137,7 @@
             let activeCount = 0, lifeCount = 0, banCount = 0;
             const now = new Date();
 
-            const filtered = users.filter(u => 
+            const filtered = allUsers.filter(u => 
                 u.username.toLowerCase().includes(search) || (u.hwid && u.hwid.toLowerCase().includes(search))
             );
 
@@ -174,81 +167,57 @@
                     <div class="u-status"><span class="badge ${badgeClass}">${badgeText}</span></div>
                     <div class="u-sub">До: ${subText}</div>
                     <div class="u-actions">
-                        <button class="btn-sm btn-gray" onclick="grantSub('${u.username}', 1)">+1д</button>
-                        <button class="btn-sm btn-gray" onclick="grantSub('${u.username}', 7)">+7д</button>
-                        <button class="btn-sm btn-gray" onclick="grantSub('${u.username}', 30)">+30д</button>
-                        <button class="btn-sm" style="background:#a855f7" onclick="grantSub('${u.username}', 0)">Life</button>
+                        <button class="btn-sm btn-gray" onclick="grantSub('${u.id}', 1)">+1д</button>
+                        <button class="btn-sm btn-gray" onclick="grantSub('${u.id}', 7)">+7д</button>
+                        <button class="btn-sm btn-gray" onclick="grantSub('${u.id}', 30)">+30д</button>
+                        <button class="btn-sm" style="background:#a855f7" onclick="grantSub('${u.id}', 0)">Life</button>
                         ${u.is_banned 
-                            ? `<button class="btn-sm btn-unban" onclick="banUser('${u.username}', false)">Разбан</button>`
-                            : `<button class="btn-sm btn-ban" onclick="banUser('${u.username}', true)">Бан</button>`
+                            ? `<button class="btn-sm btn-unban" onclick="banUser('${u.id}', false)">Разбан</button>`
+                            : `<button class="btn-sm btn-ban" onclick="banUser('${u.id}', true)">Бан</button>`
                         }
-                        <button class="btn-sm btn-ban" onclick="resetHwid('${u.username}')">Сброс HWID</button>
+                        <button class="btn-sm btn-ban" onclick="resetHwid('${u.id}')">Сброс HWID</button>
                     </div>
                 `;
                 list.appendChild(row);
             });
 
-            // Обновляем стату
-            document.getElementById('stat-total').innerText = users.length;
+            document.getElementById('stat-total').innerText = allUsers.length;
             document.getElementById('stat-active').innerText = activeCount;
             document.getElementById('stat-lifetime').innerText = lifeCount;
             document.getElementById('stat-banned').innerText = banCount;
         }
 
-        window.grantSub = function(username, days) {
-            const users = getUsers();
-            const u = users.find(x => x.username === username);
-            if (!u) return;
-
-            if (days === 0) {
-                u.is_lifetime = true;
-                u.subscription_until = null;
-                showMsg(`Выдан Lifetime для ${username}`);
-            } else {
-                const now = new Date();
-                const current = u.subscription_until ? new Date(u.subscription_until) : now;
-                const start = current > now ? current : now;
-                start.setDate(start.getDate() + days);
-                u.subscription_until = start.toISOString();
-                u.is_lifetime = false;
-                showMsg(`Выдано ${days} дней для ${username}`);
-            }
-            saveUsers(users);
-            renderList();
+        window.grantSub = async function(userId, days) {
+            const { data, error } = await dbClient.rpc('admin_grant_subscription', { p_user_id: userId, p_days: days });
+            if (error || !data.ok) return showMsg("Ошибка выдачи", "error");
+            showMsg(days === 0 ? "Выдан Lifetime" : `Выдано ${days} дней`);
+            fetchUsers();
         };
 
-        window.banUser = function(username, isBanned) {
-            const users = getUsers();
-            const u = users.find(x => x.username === username);
-            if (!u) return;
-            u.is_banned = isBanned;
-            u.ban_reason = isBanned ? 'Решение администратора' : '';
-            saveUsers(users);
-            showMsg(isBanned ? `Юзер ${username} забанен` : `Юзер ${username} разбанен`);
-            renderList();
+        window.banUser = async function(userId, isBanned) {
+            const { data, error } = await dbClient.rpc('admin_set_ban', { p_user_id: userId, p_banned: isBanned, p_reason: isBanned ? 'Решение администратора' : null });
+            if (error || !data.ok) return showMsg("Ошибка бана", "error");
+            showMsg(isBanned ? "Юзер забанен" : "Юзер разбанен");
+            fetchUsers();
         };
 
-        window.resetHwid = function(username) {
-            if (!confirm(`Сбросить HWID для ${username}?`)) return;
-            const users = getUsers();
-            const u = users.find(x => x.username === username);
-            if (!u) return;
-            u.hwid = '';
-            saveUsers(users);
-            showMsg(`HWID сброшен для ${username}`);
-            renderList();
+        window.resetHwid = async function(userId) {
+            if (!confirm("Сбросить HWID этому юзеру?")) return;
+            // Прямой запрос (если разрешено RLS админу) или через RPC, если напишешь позже.
+            const { error } = await dbClient.from('profiles').update({ hwid: null }).eq('id', userId);
+            if (error) return showMsg("Ошибка сброса", "error");
+            showMsg("HWID сброшен");
+            fetchUsers();
         };
 
-        // Генерация ключей (пока сохраняем в консоль/localStorage)
-        window.generateKey = function() {
-            const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let r = '';
-            for (let i = 0; i < 24; i++) r += A[Math.floor(Math.random() * A.length)];
-            showMsg(`Ключ: ${r} (Скопирован в консоль)`, 'success');
-            console.log(`%c[Ключ] ${r}`, 'color:#a855f7;font-size:16px;font-weight:bold;');
+        window.generateKey = async function() {
+            const { data, error } = await dbClient.rpc('admin_create_invite', { p_max_uses: 1 });
+            if (error || !data) return showMsg("Ошибка генерации", "error");
+            showMsg(`Ключ: ${data} (Скопирован в консоль)`);
+            console.log(`%c[Ключ] ${data}`, 'color:#a855f7;font-size:16px;font-weight:bold;');
         };
 
-        renderList();
+        fetchUsers();
     </script>
 </body>
 </html>
