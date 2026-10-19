@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoidSense Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #030006; --glass-bg: rgba(12, 5, 20, 0.6); --glass-border: rgba(168, 85, 247, 0.2); --accent: #a855f7; --text: #f8f8fa; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.5); --font-sans: 'Inter', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg); color: var(--text); font-family: var(--font-sans); min-height: 100vh; padding: 40px; background-image: radial-gradient(circle at 50% 0%, #150726 0%, var(--bg) 70%); display: flex; justify-content: center; }
+        
+        .admin-container { width: 100%; max-width: 1200px; background: var(--glass-bg); backdrop-filter: blur(30px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9); }
+        h1 { font-size: 24px; font-weight: 600; margin-bottom: 30px; color: var(--accent); letter-spacing: 1px; }
+        
+        .toolbar { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        input { padding: 14px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; color: var(--text); font-family: var(--font-sans); outline: none; }
+        input:focus { border-color: var(--accent); }
+        button { padding: 14px 20px; border: none; border-radius: 12px; background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%); color: white; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: var(--font-sans); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(168, 85, 247, 0.5); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 14px; }
+        th { color: var(--text-dim); font-weight: 500; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+        tr:hover { background: rgba(255, 255, 255, 0.02); }
+        
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-sm { padding: 8px 12px; font-size: 12px; border-radius: 8px; }
+        .btn-red { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+        .btn-green { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
+        .btn-gray { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+        
+        .status { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .status.active { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+        .status.expired { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .status.banned { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .status.lifetime { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
+
+        #msg-box { font-size: 13px; text-align: center; padding: 12px; border-radius: 10px; margin-bottom: 20px; display: none; }
+        #msg-box.success { display: block; background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.2); }
+        #msg-box.error { display: block; background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>VoidSense Admin Panel</h1>
+        <div id="msg-box"></div>
+        
+        <div class="toolbar">
+            <input type="text" id="search-input" placeholder="Поиск по юзеру или HWID..." style="flex: 1;">
+            <button onclick="renderTable()">Обновить</button>
+            <button onclick="window.location.href='index.html'" class="btn-gray">На сайт</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Юзер</th>
+                    <th>HWID</th>
+                    <th>Статус</th>
+                    <th>Подписка до</th>
+                    <th>Действия (Подписка)</th>
+                    <th>Действия (Бан)</th>
+                </tr>
+            </thead>
+            <tbody id="users-table">
+                <!-- Сюда рендерятся юзеры -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function showMsg(text, type = 'success') {
+            const box = document.getElementById('msg-box');
+            box.className = type; box.innerText = text;
+            setTimeout(() => { box.className = ''; box.innerText = ''; }, 3000);
+        }
+
+        function getUsers() { return JSON.parse(localStorage.getItem('vs_users') || '[]'); }
+        function saveUsers(users) { localStorage.setItem('vs_users', JSON.stringify(users)); }
+
+        function renderTable() {
+            const users = getUsers();
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const tbody = document.getElementById('users-table');
+            tbody.innerHTML = '';
+
+            const filtered = users.filter(u => 
+                u.username.toLowerCase().includes(search) || 
+                (u.hwid && u.hwid.toLowerCase().includes(search))
+            );
+
+            filtered.forEach(u => {
+                const tr = document.createElement('tr');
+                
+                let statusHtml = '';
+                if (u.is_banned) statusHtml = '<span class="status banned">Забанен</span>';
+                else if (u.is_lifetime) statusHtml = '<span class="status lifetime">Lifetime</span>';
+                else if (u.subscription_until && new Date(u.subscription_until) > new Date()) statusHtml = '<span class="status active">Активен</span>';
+                else statusHtml = '<span class="status expired">Нет</span>';
+
+                let subDate = u.is_lifetime ? 'Навсегда' : (u.subscription_until ? new Date(u.subscription_until).toLocaleDateString() : '-');
+
+                tr.innerHTML = `
+                    <td><b>${u.username}</b></td>
+                    <td>${u.hwid || '<span style="color:#8a8a9e">Не привязан</span>'}</td>
+                    <td>${statusHtml}</td>
+                    <td>${subDate}</td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn-sm" onclick="grantSub('${u.username}', 1)">+1д</button>
+                            <button class="btn-sm" onclick="grantSub('${u.username}', 7)">+7д</button>
+                            <button class="btn-sm" onclick="grantSub('${u.username}', 30)">+30д</button>
+                            <button class="btn-sm btn-green" onclick="grantSub('${u.username}', 0)">Life</button>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            ${u.is_banned 
+                                ? `<button class="btn-sm btn-green" onclick="banUser('${u.username}', false)">Разбанить</button>`
+                                : `<button class="btn-sm btn-red" onclick="banUser('${u.username}', true)">Забанить</button>`
+                            }
+                            <button class="btn-sm btn-red" onclick="resetHwid('${u.username}')">Сброс HWID</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.grantSub = function(username, days) {
+            const users = getUsers();
+            const u = users.find(x => x.username === username);
+            if (!u) return;
+
+            if (days === 0) {
+                u.is_lifetime = true;
+                u.subscription_until = null;
+                showMsg(`Выдан Lifetime для ${username}`);
+            } else {
+                const now = new Date();
+                const current = u.subscription_until ? new Date(u.subscription_until) : now;
+                const start = current > now ? current : now;
+                start.setDate(start.getDate() + days);
+                u.subscription_until = start.toISOString();
+                u.is_lifetime = false;
+                showMsg(`Выдано ${days} дней для ${username}`);
+            }
+            saveUsers(users);
+            renderTable();
+        };
+
+        window.banUser = function(username, isBanned) {
+            const users = getUsers();
+            const u = users.find(x => x.username === username);
+            if (!u) return;
+            u.is_banned = isBanned;
+            u.ban_reason = isBanned ? 'Решение администратора' : '';
+            saveUsers(users);
+            showMsg(isBanned ? `Юзер ${username} забанен` : `Юзер ${username} разбанен`);
+            renderTable();
+        };
+
+        window.resetHwid = function(username) {
+            if (!confirm(`Сбросить HWID для ${username}?`)) return;
+            const users = getUsers();
+            const u = users.find(x => x.username === username);
+            if (!u) return;
+            u.hwid = '';
+            saveUsers(users);
+            showMsg(`HWID сброшен для ${username}`);
+            renderTable();
+        };
+
+        renderTable();
+    </script>
+</body>
+</html>
