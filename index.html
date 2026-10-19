@@ -22,7 +22,6 @@
         #sparkles-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; pointer-events: none; }
         #particles-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
-        /* --- ПРЕЛОАДЕР --- */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 1000;
@@ -36,17 +35,10 @@
             animation: spin 1s linear infinite; margin-bottom: 20px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loader-title {
-            font-size: 24px; font-weight: 600; letter-spacing: 2px; color: var(--text);
-            margin-bottom: 10px; text-transform: lowercase;
-        }
-        .loader-sub {
-            font-size: 14px; font-weight: 500; letter-spacing: 4px; color: var(--accent);
-            text-transform: uppercase; animation: blink 1.5s infinite;
-        }
+        .loader-title { font-size: 24px; font-weight: 600; letter-spacing: 2px; color: var(--text); margin-bottom: 10px; text-transform: lowercase; }
+        .loader-sub { font-size: 14px; font-weight: 500; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; animation: blink 1.5s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
-        /* --- ОСНОВНАЯ КАРТОЧКА --- */
         .glass-card {
             background: var(--glass-bg); backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%);
             border: 1px solid var(--glass-border); border-radius: 24px; padding: 45px 40px; width: 100%; max-width: 380px;
@@ -106,7 +98,6 @@
     </style>
 </head>
 <body>
-    <!-- ЗАГРУЗЧИК -->
     <div id="loader">
         <div class="loader-spinner"></div>
         <div class="loader-title">makcu</div>
@@ -162,7 +153,6 @@
 
             <div id="sub-info" class="sub-info"></div>
             
-            <!-- Кнопка админа -->
             <button id="admin-btn" onclick="window.location.href='admin.html'" style="display: none; background: linear-gradient(135deg, #3b0764 0%, #7e22ce 100%); border: 1px solid #a855f7; margin-top: 15px;">
                 Админ-панель
             </button>
@@ -177,12 +167,7 @@
         const { createClient } = supabase;
         const dbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Исправленный домен для прохождения валидации Supabase
-        function toEmail(username) {
-            return username.toLowerCase().replace(/[^a-z0-9]/g, '') + "@gmail.com";
-        }
-
-        // --- Эффекты ---
+        // Эффекты
         const bgCanvas = document.getElementById('particles-canvas');
         const bgCtx = bgCanvas.getContext('2d');
         let w, h, bgParticles = [];
@@ -214,7 +199,7 @@
             input.addEventListener('input', () => { const rect = input.getBoundingClientRect(); for (let i = 0; i < 3; i++) sparkles.push(new Sparkle(rect.left + Math.random() * rect.width, rect.top + rect.height / 2)); });
         });
 
-        // --- Логика ---
+        // Логика UI
         window.switchTab = function(tab, index) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab')[index].classList.add('active');
@@ -240,11 +225,8 @@
             const subInfo = document.getElementById('sub-info'), dlArea = document.getElementById('download-area'), label = document.getElementById('access-label');
             const adminBtn = document.getElementById('admin-btn');
 
-            if (d.role === 'admin') {
-                adminBtn.style.display = 'block';
-            } else {
-                adminBtn.style.display = 'none';
-            }
+            if (d.role === 'admin') { adminBtn.style.display = 'block'; } 
+            else { adminBtn.style.display = 'none'; }
 
             if (d.is_banned) {
                 document.getElementById('hwid-section').style.display = 'none'; dlArea.style.display = 'none';
@@ -282,38 +264,59 @@
                 toggleDashboardView(false);
                 switchTab('login', 0);
             }
-            // Скрываем прелоадер после проверки
             document.getElementById('loader').classList.add('hidden');
         }
 
+        // Анонимная регистрация (без Email)
         window.register = async function() {
             const username = document.getElementById('reg-user').value.trim();
             const pass = document.getElementById('reg-pass').value;
             if (username.length < 3) return showMsg("Username must be at least 3 chars");
             if (pass.length < 6) return showMsg("Password must be at least 6 chars");
 
-            const email = toEmail(username);
-            const { error } = await dbClient.auth.signUp({ email, password: pass });
+            // Создаем анонимного юзера в Supabase
+            const { data, error } = await dbClient.auth.signInAnonymously();
             if (error) return showMsg(error.message);
+
+            // Сохраняем ник и пароль прямо в метаданные юзера
+            await dbClient.auth.updateUser({ data: { username: username, password: pass } });
+            
+            // Обновляем профиль (сохраняем ник в базу)
+            await dbClient.rpc('create_profile', { p_username: username });
+
             showMsg("Account created successfully", "success");
-            setTimeout(() => { switchTab('login', 0); document.getElementById('login-user').value = username; }, 800);
+            setTimeout(() => { checkAuth(); }, 800);
         };
 
+        // Вход (тоже анонимный, ищем по нику)
         window.login = async function() {
-            document.getElementById('loader').classList.remove('hidden'); // Показываем загрузчик при входе
+            document.getElementById('loader').classList.remove('hidden');
             const username = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value;
-            const email = toEmail(username);
-            const { error } = await dbClient.auth.signInWithPassword({ email, password: pass });
-            if (error) {
+
+            // Ищем юзера по нику через нашу функцию в базе
+            const { data, error } = await dbClient.rpc('login_user', { p_username: username, p_password: pass });
+            
+            if (error || !data || !data.ok) {
                 document.getElementById('loader').classList.add('hidden');
                 return showMsg("Invalid username or password");
+            }
+
+            // Если нашли — восстанавливаем анонимную сессию по его токену
+            const { error: authErr } = await dbClient.auth.setSession({
+                access_token: data.access_token,
+                refresh_token: data.refresh_token
+            });
+
+            if (authErr) {
+                document.getElementById('loader').classList.add('hidden');
+                return showMsg("Auth error");
             }
             checkAuth();
         };
 
         window.logout = async function() {
-            document.getElementById('loader').classList.remove('hidden'); // Показываем загрузчик при выходе
+            document.getElementById('loader').classList.remove('hidden');
             await dbClient.auth.signOut();
             checkAuth();
             document.getElementById('hwid-input').value = ''; document.getElementById('login-pass').value = '';
