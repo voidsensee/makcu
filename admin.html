@@ -3,70 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoidSense Admin</title>
+    <title>.</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #030006; --glass-bg: rgba(12, 5, 20, 0.6); --glass-border: rgba(168, 85, 247, 0.2); --accent: #a855f7; --text: #f8f8fa; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.5); --font-sans: 'Inter', sans-serif; }
+        :root { --bg: #030006; --glass-bg: rgba(12, 5, 20, 0.6); --glass-border: rgba(168, 85, 247, 0.15); --accent: #a855f7; --text: #f8f8fa; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.4); --font-sans: 'Inter', sans-serif; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--text); font-family: var(--font-sans); min-height: 100vh; padding: 40px; background-image: radial-gradient(circle at 50% 0%, #150726 0%, var(--bg) 70%); display: flex; justify-content: center; }
+        body {
+            background-color: var(--bg); color: var(--text); font-family: var(--font-sans);
+            min-height: 100vh; padding: 40px 20px; display: flex; justify-content: center;
+            background-image: radial-gradient(circle at 50% 0%, #150726 0%, var(--bg) 70%);
+        }
         
-        .admin-container { width: 100%; max-width: 1200px; background: var(--glass-bg); backdrop-filter: blur(30px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9); }
-        h1 { font-size: 24px; font-weight: 600; margin-bottom: 30px; color: var(--accent); letter-spacing: 1px; }
-        
-        .toolbar { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
-        input { padding: 14px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; color: var(--text); font-family: var(--font-sans); outline: none; }
-        input:focus { border-color: var(--accent); }
-        button { padding: 14px 20px; border: none; border-radius: 12px; background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%); color: white; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: var(--font-sans); }
-        button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(168, 85, 247, 0.5); }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 14px; }
-        th { color: var(--text-dim); font-weight: 500; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
-        tr:hover { background: rgba(255, 255, 255, 0.02); }
-        
-        .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .btn-sm { padding: 8px 12px; font-size: 12px; border-radius: 8px; }
-        .btn-red { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
-        .btn-green { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
-        .btn-gray { background: rgba(255, 255, 255, 0.1); color: var(--text); }
-        
-        .status { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-        .status.active { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
-        .status.expired { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
-        .status.banned { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
-        .status.lifetime { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
+        .admin-wrapper { width: 100%; max-width: 1100px; animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        #msg-box { font-size: 13px; text-align: center; padding: 12px; border-radius: 10px; margin-bottom: 20px; display: none; }
+        /* Шапка */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .logo { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .logo::before { content: ''; display: block; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+        
+        /* Статистика */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; backdrop-filter: blur(20px); }
+        .stat-card .label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .stat-card .value { font-size: 28px; font-weight: 600; color: var(--text); }
+        .stat-card .value.active { color: #6ee7b7; }
+        .stat-card .value.lifetime { color: #d8b4fe; }
+        .stat-card .value.banned { color: #fca5a5; }
+
+        /* Панель инструментов */
+        .toolbar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        input { padding: 14px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; color: var(--text); font-family: var(--font-sans); outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1); }
+        button { padding: 14px 20px; border: none; border-radius: 12px; background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%); color: white; font-weight: 500; font-family: var(--font-sans); cursor: pointer; transition: 0.3s; white-space: nowrap; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(168, 85, 247, 0.4); }
+        .btn-gray { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text); }
+        .btn-gray:hover { background: rgba(255, 255, 255, 0.1); box-shadow: none; }
+
+        /* Список юзеров */
+        .user-list { display: flex; flex-direction: column; gap: 15px; }
+        .user-row {
+            background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 20px 25px; backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; gap: 20px;
+            transition: 0.3s;
+        }
+        .user-row:hover { background: rgba(25, 10, 40, 0.7); border-color: rgba(168, 85, 247, 0.3); }
+        
+        .u-info { flex: 1; min-width: 150px; }
+        .u-name { font-weight: 600; font-size: 16px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+        .u-hwid { font-size: 12px; color: var(--text-dim); font-family: monospace; }
+        
+        .u-status { width: 120px; }
+        .badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
+        .badge.active { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge.expired { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge.lifetime { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.3); }
+        .badge.banned { background: rgba(239, 68, 68, 0.3); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.5); }
+
+        .u-sub { width: 130px; font-size: 13px; color: var(--text-dim); }
+        
+        .u-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        .btn-sm { padding: 8px 12px; font-size: 12px; border-radius: 8px; }
+        .btn-ban { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .btn-ban:hover { background: rgba(239, 68, 68, 0.3); box-shadow: none; transform: none; }
+        .btn-unban { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .btn-unban:hover { background: rgba(16, 185, 129, 0.3); box-shadow: none; transform: none; }
+
+        #msg-box { font-size: 13px; text-align: center; padding: 12px; border-radius: 12px; margin-bottom: 20px; display: none; }
         #msg-box.success { display: block; background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.2); }
         #msg-box.error { display: block; background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .user-row { flex-direction: column; align-items: flex-start; }
+            .u-actions { width: 100%; justify-content: flex-start; }
+        }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <h1>VoidSense Admin Panel</h1>
-        <div id="msg-box"></div>
+    <div class="admin-wrapper">
         
-        <div class="toolbar">
-            <input type="text" id="search-input" placeholder="Поиск по юзеру или HWID..." style="flex: 1;">
-            <button onclick="renderTable()">Обновить</button>
-            <button onclick="window.location.href='index.html'" class="btn-gray">На сайт</button>
+        <div class="header">
+            <div class="logo">Admin Panel</div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-gray" onclick="window.location.href='index.html'">На сайт</button>
+            </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Юзер</th>
-                    <th>HWID</th>
-                    <th>Статус</th>
-                    <th>Подписка до</th>
-                    <th>Действия (Подписка)</th>
-                    <th>Действия (Бан)</th>
-                </tr>
-            </thead>
-            <tbody id="users-table">
-                <!-- Сюда рендерятся юзеры -->
-            </tbody>
-        </table>
+        <div id="msg-box"></div>
+
+        <!-- Статистика -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Всего юзеров</div>
+                <div class="value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Активных</div>
+                <div class="value active" id="stat-active">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Lifetime</div>
+                <div class="value lifetime" id="stat-lifetime">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Забанено</div>
+                <div class="value banned" id="stat-banned">0</div>
+            </div>
+        </div>
+
+        <!-- Инструменты -->
+        <div class="toolbar">
+            <input type="text" id="search-input" placeholder="Поиск по логину или HWID..." style="flex: 1;" oninput="renderList()">
+            <button onclick="generateKey()">Сгенерировать ключ</button>
+            <button class="btn-gray" onclick="renderList()">Обновить</button>
+        </div>
+
+        <!-- Список -->
+        <div class="user-list" id="user-list">
+            <!-- Рендерится через JS -->
+        </div>
     </div>
 
     <script>
@@ -79,53 +135,64 @@
         function getUsers() { return JSON.parse(localStorage.getItem('vs_users') || '[]'); }
         function saveUsers(users) { localStorage.setItem('vs_users', JSON.stringify(users)); }
 
-        function renderTable() {
+        function renderList() {
             const users = getUsers();
             const search = document.getElementById('search-input').value.toLowerCase();
-            const tbody = document.getElementById('users-table');
-            tbody.innerHTML = '';
+            const list = document.getElementById('user-list');
+            list.innerHTML = '';
+
+            let activeCount = 0, lifeCount = 0, banCount = 0;
+            const now = new Date();
 
             const filtered = users.filter(u => 
-                u.username.toLowerCase().includes(search) || 
-                (u.hwid && u.hwid.toLowerCase().includes(search))
+                u.username.toLowerCase().includes(search) || (u.hwid && u.hwid.toLowerCase().includes(search))
             );
 
             filtered.forEach(u => {
-                const tr = document.createElement('tr');
-                
-                let statusHtml = '';
-                if (u.is_banned) statusHtml = '<span class="status banned">Забанен</span>';
-                else if (u.is_lifetime) statusHtml = '<span class="status lifetime">Lifetime</span>';
-                else if (u.subscription_until && new Date(u.subscription_until) > new Date()) statusHtml = '<span class="status active">Активен</span>';
-                else statusHtml = '<span class="status expired">Нет</span>';
+                if (u.is_banned) banCount++;
+                else if (u.is_lifetime) lifeCount++;
+                else if (u.subscription_until && new Date(u.subscription_until) > now) activeCount++;
 
-                let subDate = u.is_lifetime ? 'Навсегда' : (u.subscription_until ? new Date(u.subscription_until).toLocaleDateString() : '-');
+                let badgeClass = 'expired', badgeText = 'Нет подписки', subText = '-';
 
-                tr.innerHTML = `
-                    <td><b>${u.username}</b></td>
-                    <td>${u.hwid || '<span style="color:#8a8a9e">Не привязан</span>'}</td>
-                    <td>${statusHtml}</td>
-                    <td>${subDate}</td>
-                    <td>
-                        <div class="actions">
-                            <button class="btn-sm" onclick="grantSub('${u.username}', 1)">+1д</button>
-                            <button class="btn-sm" onclick="grantSub('${u.username}', 7)">+7д</button>
-                            <button class="btn-sm" onclick="grantSub('${u.username}', 30)">+30д</button>
-                            <button class="btn-sm btn-green" onclick="grantSub('${u.username}', 0)">Life</button>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="actions">
-                            ${u.is_banned 
-                                ? `<button class="btn-sm btn-green" onclick="banUser('${u.username}', false)">Разбанить</button>`
-                                : `<button class="btn-sm btn-red" onclick="banUser('${u.username}', true)">Забанить</button>`
-                            }
-                            <button class="btn-sm btn-red" onclick="resetHwid('${u.username}')">Сброс HWID</button>
-                        </div>
-                    </td>
+                if (u.is_banned) {
+                    badgeClass = 'banned'; badgeText = 'Забанен';
+                } else if (u.is_lifetime) {
+                    badgeClass = 'lifetime'; badgeText = 'Lifetime'; subText = 'Навсегда';
+                } else if (u.subscription_until && new Date(u.subscription_until) > now) {
+                    badgeClass = 'active'; badgeText = 'Активен';
+                    subText = new Date(u.subscription_until).toLocaleDateString('ru-RU');
+                }
+
+                const row = document.createElement('div');
+                row.className = 'user-row';
+                row.innerHTML = `
+                    <div class="u-info">
+                        <div class="u-name">${u.username}</div>
+                        <div class="u-hwid">${u.hwid || 'HWID: Не привязан'}</div>
+                    </div>
+                    <div class="u-status"><span class="badge ${badgeClass}">${badgeText}</span></div>
+                    <div class="u-sub">До: ${subText}</div>
+                    <div class="u-actions">
+                        <button class="btn-sm btn-gray" onclick="grantSub('${u.username}', 1)">+1д</button>
+                        <button class="btn-sm btn-gray" onclick="grantSub('${u.username}', 7)">+7д</button>
+                        <button class="btn-sm btn-gray" onclick="grantSub('${u.username}', 30)">+30д</button>
+                        <button class="btn-sm" style="background:#a855f7" onclick="grantSub('${u.username}', 0)">Life</button>
+                        ${u.is_banned 
+                            ? `<button class="btn-sm btn-unban" onclick="banUser('${u.username}', false)">Разбан</button>`
+                            : `<button class="btn-sm btn-ban" onclick="banUser('${u.username}', true)">Бан</button>`
+                        }
+                        <button class="btn-sm btn-ban" onclick="resetHwid('${u.username}')">Сброс HWID</button>
+                    </div>
                 `;
-                tbody.appendChild(tr);
+                list.appendChild(row);
             });
+
+            // Обновляем стату
+            document.getElementById('stat-total').innerText = users.length;
+            document.getElementById('stat-active').innerText = activeCount;
+            document.getElementById('stat-lifetime').innerText = lifeCount;
+            document.getElementById('stat-banned').innerText = banCount;
         }
 
         window.grantSub = function(username, days) {
@@ -147,7 +214,7 @@
                 showMsg(`Выдано ${days} дней для ${username}`);
             }
             saveUsers(users);
-            renderTable();
+            renderList();
         };
 
         window.banUser = function(username, isBanned) {
@@ -158,7 +225,7 @@
             u.ban_reason = isBanned ? 'Решение администратора' : '';
             saveUsers(users);
             showMsg(isBanned ? `Юзер ${username} забанен` : `Юзер ${username} разбанен`);
-            renderTable();
+            renderList();
         };
 
         window.resetHwid = function(username) {
@@ -169,10 +236,19 @@
             u.hwid = '';
             saveUsers(users);
             showMsg(`HWID сброшен для ${username}`);
-            renderTable();
+            renderList();
         };
 
-        renderTable();
+        // Генерация ключей (пока сохраняем в консоль/localStorage)
+        window.generateKey = function() {
+            const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let r = '';
+            for (let i = 0; i < 24; i++) r += A[Math.floor(Math.random() * A.length)];
+            showMsg(`Ключ: ${r} (Скопирован в консоль)`, 'success');
+            console.log(`%c[Ключ] ${r}`, 'color:#a855f7;font-size:16px;font-weight:bold;');
+        };
+
+        renderList();
     </script>
 </body>
 </html>
