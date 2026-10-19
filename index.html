@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoidSense</title>
+    <title>.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -91,20 +91,14 @@
 
         .form-container { display: none; animation: fadeSlide 0.4s ease-out; }
         .form-container.active { display: block; }
-        @keyframes fadeSlide {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .input-group { margin-bottom: 18px; position: relative; }
         input {
             width: 100%; padding: 16px 18px;
             background: var(--input-bg);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            color: var(--text);
-            font-size: 14px;
-            font-family: var(--font-sans);
-            outline: none;
+            border-radius: 12px; color: var(--text);
+            font-size: 14px; font-family: var(--font-sans); outline: none;
             transition: all 0.3s ease;
             box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
         }
@@ -178,7 +172,7 @@
             <button onclick="login()">Sign In</button>
         </div>
 
-        <!-- REGISTER (БЕЗ ИНВАЙТА) -->
+        <!-- REGISTER -->
         <div id="form-register" class="form-container">
             <div class="input-group">
                 <input type="text" id="reg-user" class="sparkle-input" placeholder="Username" required autocomplete="off">
@@ -229,8 +223,7 @@
             if (!u) return { ok: false, error: 'no_profile' };
             if (u.is_banned) return { ok: false, error: 'banned', reason: u.ban_reason };
             if (u.hwid) return { ok: false, error: 'hwid_already_bound' };
-            if (db.users.some(x => x.hwid === hwid && x.username !== username))
-                return { ok: false, error: 'hwid_taken' };
+            if (db.users.some(x => x.hwid === hwid && x.username !== username)) return { ok: false, error: 'hwid_taken' };
             u.hwid = hwid;
             u.hwid_bound_at = Date.now();
             DB.saveUsers(db.users);
@@ -294,10 +287,8 @@
 
         function showMsg(text, type = 'error') {
             const box = document.getElementById('msg-box');
-            box.className = `msg ${type}`;
-            box.innerText = text;
-            clearTimeout(showMsg._t);
-            showMsg._t = setTimeout(() => { box.className = 'msg'; }, 5000);
+            box.className = `msg ${type}`; box.innerText = text;
+            clearTimeout(showMsg._t); showMsg._t = setTimeout(() => { box.className = 'msg'; }, 5000);
         }
         function clearMsg() { document.getElementById('msg-box').className = 'msg'; }
         function toggleDashboardView(hasHwid) {
