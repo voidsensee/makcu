@@ -9,46 +9,87 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Тут стили оставляем без изменений, я их сократил для удобства */
-        :root { --bg: #020005; --glass-bg: rgba(18, 10, 28, 0.4); --glass-border: rgba(168, 85, 247, 0.15); --accent: #a855f7; --text: #ffffff; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.5); --font-sans: 'Outfit', sans-serif; }
+        :root { 
+            --bg: #020005; --glass-bg: rgba(18, 10, 28, 0.4); --glass-border: rgba(168, 85, 247, 0.15); 
+            --accent: #a855f7; --text: #ffffff; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.5); --font-sans: 'Outfit', sans-serif; 
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--text); font-family: var(--font-sans); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; position: relative; background-image: radial-gradient(circle at 50% 0%, #1e0a33 0%, var(--bg) 70%); }
-        #clan-tag-container { position: absolute; top: 40px; font-size: 24px; font-weight: 700; letter-spacing: 2px; color: var(--text); display: flex; gap: 2px; z-index: 2; text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); opacity: 0; animation: fadeIn 1s ease-out 0.5s forwards; }
+        body {
+            background-color: var(--bg); color: var(--text); font-family: var(--font-sans);
+            min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            overflow: hidden; position: relative; background-image: radial-gradient(circle at 50% 0%, #1e0a33 0%, var(--bg) 70%);
+        }
+
+        /* Клан-тег */
+        #clan-tag-container {
+            position: absolute; top: 40px; font-size: 24px; font-weight: 700; letter-spacing: 2px; color: var(--text);
+            display: flex; gap: 2px; z-index: 2; text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); opacity: 0;
+            animation: fadeIn 1s ease-out 0.5s forwards;
+        }
         #clan-tag-container span { opacity: 0; transform: translateY(-10px); animation: dropIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes dropIn { to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { to { opacity: 1; } }
+
+        /* Канвасы */
         #sparkles-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; pointer-events: none; }
         #particles-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+        /* Прелоадер */
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease, visibility 0.6s; }
         #loader.hidden { opacity: 0; visibility: hidden; }
         .loader-spinner { width: 40px; height: 40px; border: 2px solid rgba(168, 85, 247, 0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .glass-card { background: var(--glass-bg); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid var(--glass-border); border-radius: 24px; padding: 45px 40px; width: 100%; max-width: 380px; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.08), inset 0 -1px 1px rgba(0, 0, 0, 0.5); position: relative; z-index: 1; animation: cardIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(30px) scale(0.98); }
+
+        /* Стеклянная карточка */
+        .glass-card {
+            background: var(--glass-bg); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 45px 40px; width: 100%; max-width: 380px;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.08), inset 0 -1px 1px rgba(0, 0, 0, 0.5);
+            position: relative; z-index: 1; animation: cardIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(30px) scale(0.98);
+        }
         @keyframes cardIn { to { opacity: 1; transform: translateY(0) scale(1); } }
         .glass-card::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.6; }
+
+        /* Табы */
         .tabs { display: flex; margin-bottom: 30px; background: rgba(0, 0, 0, 0.6); border-radius: 14px; padding: 6px; position: relative; box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.8); border: 1px solid rgba(255,255,255,0.02); }
         .tab-indicator { position: absolute; top: 6px; bottom: 6px; left: 6px; width: calc(50% - 6px); background: linear-gradient(180deg, rgba(168, 85, 247, 0.25), rgba(168, 85, 247, 0.1)); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 10px; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1); z-index: 1; }
         .tab-indicator.right { transform: translateX(100%); }
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-dim); transition: color 0.3s; position: relative; z-index: 2; user-select: none; text-transform: uppercase; }
         .tab.active { color: var(--text); text-shadow: 0 0 10px rgba(255,255,255,0.3); }
         .tab:hover:not(.active) { color: rgba(255, 255, 255, 0.8); }
+
+        /* Формы */
         .form-container { display: none; animation: fadeSlide 0.4s ease-out; }
         .form-container.active { display: block; }
         @keyframes fadeSlide { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
         .input-group { margin-bottom: 18px; position: relative; }
-        input { width: 100%; padding: 16px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; color: var(--text); font-size: 15px; font-family: var(--font-sans); outline: none; transition: all 0.3s ease; box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.4); }
+        input {
+            width: 100%; padding: 16px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px; color: var(--text); font-size: 15px; font-family: var(--font-sans); outline: none;
+            transition: all 0.3s ease; box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
         input::placeholder { color: rgba(255, 255, 255, 0.2); font-weight: 400; letter-spacing: 0.5px; }
         input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.7); box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15), inset 0 4px 8px rgba(0, 0, 0, 0.4); }
-        button { width: 100%; padding: 16px; border: none; border-radius: 14px; background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%); color: white; font-weight: 600; font-size: 14px; font-family: var(--font-sans); letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.5); margin-top: 10px; }
+        
+        button {
+            width: 100%; padding: 16px; border: none; border-radius: 14px; background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%);
+            color: white; font-weight: 600; font-size: 14px; font-family: var(--font-sans); letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.5); margin-top: 10px;
+        }
         button::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transform: skewX(-25deg); transition: 0.6s; }
         button:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 15px 35px -5px rgba(168, 85, 247, 0.7); }
         button:hover::before { left: 150%; }
         button:active { transform: translateY(0) scale(0.99); }
+        
         button.secondary { background: rgba(255, 255, 255, 0.03); box-shadow: none; border: 1px solid rgba(255, 255, 255, 0.08); margin-top: 15px; color: var(--text-dim); }
         button.secondary:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); box-shadow: none; }
+
+        /* Сообщения */
         .msg { font-size: 13px; text-align: center; padding: 14px; border-radius: 12px; margin-bottom: 20px; display: none; animation: fadeSlide 0.3s ease-out; font-weight: 500; }
         .msg.error { display: block; background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
         .msg.success { display: block; background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.2); }
+        
         .hidden { display: none !important; }
         .download-block { text-align: center; margin-top: 25px; animation: fadeSlide 0.4s ease-out; }
         .download-block p { color: var(--accent); font-size: 13px; margin-bottom: 12px; font-weight: 600; letter-spacing: 0.5px; text-shadow: 0 0 10px rgba(168,85,247,0.4); }
@@ -70,16 +111,26 @@
 
         <div id="msg-box" class="msg"></div>
 
+        <!-- LOGIN -->
         <div id="form-login" class="form-container active">
-            <div class="input-group"><input type="text" id="login-user" class="sparkle-input" placeholder="Username" required autocomplete="off"></div>
+            <div class="input-group">
+                <input type="text" id="login-user" class="sparkle-input" placeholder="Username" required autocomplete="off">
+            </div>
             <button onclick="login()">Sign In</button>
         </div>
 
+        <!-- REGISTER (С КЛЮЧОМ) -->
         <div id="form-register" class="form-container">
-            <div class="input-group"><input type="text" id="reg-user" class="sparkle-input" placeholder="Username" required autocomplete="off"></div>
+            <div class="input-group">
+                <input type="text" id="reg-user" class="sparkle-input" placeholder="Username" required autocomplete="off">
+            </div>
+            <div class="input-group">
+                <input type="text" id="reg-key" class="sparkle-input" placeholder="Access Key (24 chars)" maxlength="24" style="text-transform: uppercase;" required autocomplete="off">
+            </div>
             <button onclick="register()">Create Account</button>
         </div>
 
+        <!-- DASHBOARD -->
         <div id="form-dashboard" class="form-container">
             <!-- Привязка HWID -->
             <div id="hwid-section">
@@ -89,7 +140,7 @@
                 <button onclick="bindHwid()">Bind HWID</button>
             </div>
 
-            <!-- Активация ключа -->
+            <!-- Активация ключа (если нужна доп. подписка) -->
             <div id="key-section" style="display: none; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
                 <div class="input-group">
                     <input type="text" id="activate-key-input" class="sparkle-input" placeholder="Введите ключ (24 символа)" maxlength="24" style="text-transform: uppercase;">
@@ -97,7 +148,7 @@
                 <button onclick="activateKey()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);">Активировать</button>
             </div>
 
-            <!-- Кнопка скачать -->
+            <!-- Скачивание -->
             <div id="download-area" class="download-block hidden" style="margin-top: 20px;">
                 <p id="access-label">Access Granted</p>
                 <a href="#" id="download-link" download style="text-decoration: none; display: block;">
@@ -116,7 +167,8 @@
     </div>
 
     <script>
-        const CLAN_TAG = "xyz.cc"; // Твой тег
+        // НАСТРОЙКИ
+        const CLAN_TAG = "xyz.cc"; // Твой клан-тег
         const SUPABASE_URL = "https://ygvlepfhxmyyquqaasea.supabase.co";
         const SUPABASE_KEY = "sb_publishable_ZWrKzrdxwja5xLDnrOLUeg_e9tneO0T";
         const { createClient } = supabase;
@@ -124,7 +176,7 @@
 
         let currentUser = null;
 
-        // Клан-тег
+        // Анимация клан-тега
         const tagContainer = document.getElementById('clan-tag-container');
         CLAN_TAG.split('').forEach((char, i) => {
             const span = document.createElement('span');
@@ -133,7 +185,7 @@
             tagContainer.appendChild(span);
         });
 
-        // Эффекты (сокращены для читаемости)
+        // Эффекты (Фон и Искры)
         const bgCanvas = document.getElementById('particles-canvas'); const bgCtx = bgCanvas.getContext('2d'); let w, h, bgParticles = [];
         function resizeBg() { w = bgCanvas.width = window.innerWidth; h = bgCanvas.height = window.innerHeight; } window.addEventListener('resize', resizeBg); resizeBg();
         class BgParticle { constructor() { this.reset(); this.y = Math.random() * h; } reset() { this.x = Math.random() * w; this.y = -20; this.size = Math.random() * 2 + 0.5; this.speedY = Math.random() * 0.4 + 0.1; this.speedX = Math.random() * 0.2 - 0.1; this.opacity = Math.random() * 0.3 + 0.05; } update() { this.y += this.speedY; this.x += this.speedX; if (this.y > h + 20) this.reset(); } draw() { bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fillStyle = `rgba(168, 85, 247, ${this.opacity})`; bgCtx.shadowBlur = 10; bgCtx.shadowColor = 'rgba(168, 85, 247, 0.3)'; bgCtx.fill(); } }
@@ -145,7 +197,7 @@
         function animateSparks() { sparkCtx.clearRect(0, 0, sw, sh); for (let i = sparkles.length - 1; i >= 0; i--) { let s = sparkles[i]; s.update(); s.draw(); if (s.life <= 0) sparkles.splice(i, 1); } requestAnimationFrame(animateSparks); } animateSparks();
         document.querySelectorAll('.sparkle-input').forEach(input => { input.addEventListener('input', () => { const rect = input.getBoundingClientRect(); for (let i = 0; i < 2; i++) sparkles.push(new Sparkle(rect.left + Math.random() * rect.width, rect.top + rect.height / 2)); }); });
 
-        // UI
+        // UI Логика
         window.switchTab = function(tab, index) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab')[index].classList.add('active');
@@ -155,15 +207,21 @@
             clearMsg();
         };
 
-        function showMsg(text, type = 'error') { const box = document.getElementById('msg-box'); box.className = `msg ${type}`; box.innerText = text; clearTimeout(showMsg._t); showMsg._t = setTimeout(() => { box.className = 'msg'; }, 5000); }
+        function showMsg(text, type = 'error') { 
+            const box = document.getElementById('msg-box'); 
+            box.className = `msg ${type}`; box.innerText = text; 
+            clearTimeout(showMsg._t); showMsg._t = setTimeout(() => { box.className = 'msg'; }, 5000); 
+        }
         function clearMsg() { document.getElementById('msg-box').className = 'msg'; }
 
         function renderDashboard(d) {
             const subInfo = document.getElementById('sub-info'), dlArea = document.getElementById('download-area'), label = document.getElementById('access-label');
             const adminBtn = document.getElementById('admin-btn'), keySec = document.getElementById('key-section');
 
+            // Кнопка админа
             if (d.role === 'admin' || d.role === 'founder') { adminBtn.style.display = 'block'; } else { adminBtn.style.display = 'none'; }
 
+            // Бан
             if (d.is_banned) { 
                 document.getElementById('hwid-section').style.display = 'none'; 
                 keySec.style.display = 'none'; 
@@ -173,6 +231,7 @@
             
             subInfo.style.color = 'var(--text-dim)';
             
+            // Привязка HWID
             if (!d.hwid) { 
                 document.getElementById('hwid-section').style.display = 'block'; 
                 keySec.style.display = 'none'; 
@@ -181,11 +240,12 @@
             }
             
             document.getElementById('hwid-section').style.display = 'none';
-            keySec.style.display = 'block'; // Показываем поле для ключа
+            keySec.style.display = 'block'; // Показываем поле для доп. ключей
             dlArea.style.display = 'block';
             
             let subText = d.is_lifetime ? 'Подписка: Lifetime' : (d.subscription_until ? 'Подписка до: ' + new Date(d.subscription_until).toLocaleString() : 'Подписки нет');
             
+            // Статус подписки
             if (d.active) { 
                 label.innerText = 'Access Granted'; label.style.color = 'var(--accent)'; 
                 dlArea.querySelector('button').disabled = false; dlArea.querySelector('button').style.opacity = '1'; subInfo.innerText = subText; 
@@ -215,14 +275,29 @@
             document.getElementById('loader').classList.add('hidden');
         }
 
+        // РЕГИСТРАЦИЯ С КЛЮЧОМ
         window.register = async function() {
             const username = document.getElementById('reg-user').value.trim();
+            const key = document.getElementById('reg-key').value.trim().toUpperCase();
+            
             if (username.length < 3) return showMsg("Username must be at least 3 chars");
+            if (key.length !== 24) return showMsg("Access Key must be 24 chars");
+
+            // 1. Проверяем, валиден ли ключ
+            const { data: keyData, error: keyErr } = await dbClient.rpc('check_makcu_key', { p_key: key });
+            if (keyErr || !keyData.ok) return showMsg("Invalid or used access key");
+
+            // 2. Создаем юзера
             const { data, error } = await dbClient.rpc('register_makcu_user', { p_username: username });
             if (error) return showMsg("Database error: " + error.message);
             if (!data || !data.ok) return showMsg(data.error || "Error");
+
+            // 3. Сразу активируем ключ
+            await dbClient.rpc('activate_makcu_key', { p_key: key, p_user_id: data.id });
+
             localStorage.setItem('makcu_user', data.id);
-            checkAuth();
+            showMsg("Account created & key activated!", "success");
+            setTimeout(() => checkAuth(), 500);
         };
 
         window.login = async function() {
