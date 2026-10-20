@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -279,7 +279,12 @@
             const subInfo = document.getElementById('sub-info'), dlArea = document.getElementById('download-area'), label = document.getElementById('access-label');
             const adminBtn = document.getElementById('admin-btn');
 
-            if (d.role === 'admin') { adminBtn.style.display = 'block'; } else { adminBtn.style.display = 'none'; }
+            // ИСПРАВЛЕНО: Показываем кнопку для admin и founder
+            if (d.role === 'admin' || d.role === 'founder') { 
+                adminBtn.style.display = 'block'; 
+            } else { 
+                adminBtn.style.display = 'none'; 
+            }
 
             if (d.is_banned) { 
                 document.getElementById('hwid-section').style.display = 'none'; dlArea.style.display = 'none'; 
