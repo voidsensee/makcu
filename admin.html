@@ -3,81 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>.</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Admin Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg: #030006; --glass-bg: rgba(12, 5, 20, 0.6); --glass-border: rgba(168, 85, 247, 0.15); --accent: #a855f7; --text: #f8f8fa; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.4); --font-sans: 'Inter', sans-serif; }
+        :root { 
+            --bg: #020005; --glass-bg: rgba(18, 10, 28, 0.6); --glass-border: rgba(168, 85, 247, 0.15); 
+            --accent: #a855f7; --text: #ffffff; --text-dim: #8a8a9e; --input-bg: rgba(0, 0, 0, 0.5); --font-sans: 'Outfit', sans-serif; 
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--text); font-family: var(--font-sans); min-height: 100vh; padding: 40px 20px; display: flex; justify-content: center; background-image: radial-gradient(circle at 50% 0%, #150726 0%, var(--bg) 70%); }
-        .admin-wrapper { width: 100%; max-width: 1100px; animation: fadeIn 0.6s ease-out; }
+        body { 
+            background-color: var(--bg); color: var(--text); font-family: var(--font-sans); 
+            min-height: 100vh; padding: 40px 20px; display: flex; justify-content: center; 
+            background-image: radial-gradient(circle at 50% 0%, #1e0a33 0%, var(--bg) 70%); 
+        }
+        
+        .admin-wrapper { width: 100%; max-width: 1200px; animation: fadeIn 0.6s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .logo { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
-        .logo::before { content: ''; display: block; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+        /* Шапка */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; }
+        .logo { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: 1px; display: flex; align-items: center; gap: 12px; text-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+        .logo::before { content: ''; display: block; width: 14px; height: 14px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 15px var(--accent); }
         
+        .header-actions { display: flex; gap: 12px; }
+
+        /* Кнопки */
+        button { 
+            padding: 12px 20px; border: none; border-radius: 12px; background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%); 
+            color: white; font-weight: 600; font-size: 14px; font-family: var(--font-sans); cursor: pointer; 
+            transition: 0.3s; white-space: nowrap; box-shadow: 0 4px 15px -3px rgba(168, 85, 247, 0.4);
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px -3px rgba(168, 85, 247, 0.6); }
+        .btn-gray { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text); box-shadow: none; }
+        .btn-gray:hover { background: rgba(255, 255, 255, 0.1); box-shadow: none; }
+
+        /* Статистика */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
         .stat-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; backdrop-filter: blur(20px); }
         .stat-card .label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-        .stat-card .value { font-size: 28px; font-weight: 600; color: var(--text); }
+        .stat-card .value { font-size: 28px; font-weight: 700; color: var(--text); }
         .stat-card .value.active { color: #6ee7b7; }
         .stat-card .value.lifetime { color: #d8b4fe; }
         .stat-card .value.banned { color: #fca5a5; }
 
-        .toolbar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-        input { padding: 14px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; color: var(--text); font-family: var(--font-sans); outline: none; transition: 0.3s; }
+        /* Панель инструментов */
+        .toolbar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        input { 
+            padding: 14px 18px; background: var(--input-bg); border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 12px; color: var(--text); font-family: var(--font-sans); outline: none; transition: 0.3s; 
+        }
         input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1); }
-        button { padding: 14px 20px; border: none; border-radius: 12px; background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%); color: white; font-weight: 500; font-family: var(--font-sans); cursor: pointer; transition: 0.3s; white-space: nowrap; }
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(168, 85, 247, 0.4); }
-        .btn-gray { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text); }
-        .btn-gray:hover { background: rgba(255, 255, 255, 0.1); box-shadow: none; }
 
-        .user-list { display: flex; flex-direction: column; gap: 15px; }
-        .user-row { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px 25px; backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; gap: 20px; transition: 0.3s; }
-        .user-row:hover { background: rgba(25, 10, 40, 0.7); border-color: rgba(168, 85, 247, 0.3); }
-        
-        .u-info { flex: 1; min-width: 150px; }
-        .u-name { font-weight: 600; font-size: 16px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
-        .u-hwid { font-size: 12px; color: var(--text-dim); font-family: monospace; }
-        
-        .u-status { width: 120px; }
+        /* Таблица */
+        .table-container { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; overflow: hidden; backdrop-filter: blur(20px); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 16px 20px; font-size: 12px; text-transform: uppercase; color: var(--text-dim); font-weight: 500; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr { animation: rowIn 0.4s ease-out backwards; }
+        @keyframes rowIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        tr:hover { background: rgba(168, 85, 247, 0.05); }
+
+        /* Бейджи */
         .badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
         .badge.active { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
         .badge.expired { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
         .badge.lifetime { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.3); }
         .badge.banned { background: rgba(239, 68, 68, 0.3); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.5); }
+        .badge.founder { background: rgba(234, 179, 8, 0.15); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3); }
+        .badge.admin { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.3); }
+        
+        .u-hwid { font-family: monospace; font-size: 12px; color: var(--text-dim); }
+        .u-date { font-size: 12px; color: var(--text-dim); }
 
-        .u-sub { width: 130px; font-size: 13px; color: var(--text-dim); }
-        .u-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-        .btn-sm { padding: 8px 12px; font-size: 12px; border-radius: 8px; }
+        /* Кнопки действий */
+        .u-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn-sm { padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: 500; }
         .btn-ban { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
         .btn-ban:hover { background: rgba(239, 68, 68, 0.3); box-shadow: none; transform: none; }
         .btn-unban { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
         .btn-unban:hover { background: rgba(16, 185, 129, 0.3); box-shadow: none; transform: none; }
+        .btn-disabled { opacity: 0.3; pointer-events: none; filter: grayscale(100%); }
+
+        /* Модальное окно генерации ключа */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); 
+            backdrop-filter: blur(5px); z-index: 1000; display: flex; justify-content: center; align-items: center; 
+            opacity: 0; visibility: hidden; transition: 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal { 
+            background: var(--bg); border: 1px solid var(--accent); border-radius: 20px; padding: 40px; 
+            width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(168, 85, 247, 0.3);
+            transform: scale(0.9); transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.active .modal { transform: scale(1); }
+        .modal h2 { margin-bottom: 20px; font-weight: 600; font-size: 22px; }
+        .modal-input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .modal-input-group input { flex: 1; text-align: center; font-size: 18px; font-weight: 600; letter-spacing: 2px; color: var(--accent); }
+        .modal p { color: var(--text-dim); font-size: 13px; margin-bottom: 20px; }
 
         #msg-box { font-size: 13px; text-align: center; padding: 12px; border-radius: 12px; margin-bottom: 20px; display: none; }
         #msg-box.success { display: block; background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.2); }
         #msg-box.error { display: block; background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .user-row { flex-direction: column; align-items: flex-start; }
-            .u-actions { width: 100%; justify-content: flex-start; }
+            .table-container { overflow-x: auto; }
         }
     </style>
 </head>
 <body>
     <div class="admin-wrapper">
+        <!-- Шапка -->
         <div class="header">
-            <div class="logo">Admin Panel</div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-gray" onclick="window.location.href='index.html'">На сайт</button>
+            <div class="logo">Admin Menu</div>
+            <div class="header-actions">
+                <button onclick="window.location.href='index.html'" class="btn-gray">На сайт</button>
+                <button onclick="openKeyModal()">Создать ключ</button>
             </div>
         </div>
 
         <div id="msg-box"></div>
 
+        <!-- Статистика -->
         <div class="stats-grid">
             <div class="stat-card"><div class="label">Всего юзеров</div><div class="value" id="stat-total">0</div></div>
             <div class="stat-card"><div class="label">Активных</div><div class="value active" id="stat-active">0</div></div>
@@ -85,13 +135,50 @@
             <div class="stat-card"><div class="label">Забанено</div><div class="value banned" id="stat-banned">0</div></div>
         </div>
 
+        <!-- Инструменты -->
         <div class="toolbar">
-            <input type="text" id="search-input" placeholder="Поиск по логину или HWID..." style="flex: 1;" oninput="renderList()">
-            <button onclick="generateKey()">Сгенерировать ключ</button>
+            <input type="text" id="search-input" placeholder="Поиск по юзеру или HWID..." style="flex: 1;" oninput="renderList()">
             <button class="btn-gray" onclick="fetchUsers()">Обновить</button>
         </div>
 
-        <div class="user-list" id="user-list"></div>
+        <!-- Таблица юзеров -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Юзер</th>
+                        <th>HWID</th>
+                        <th>Дата рег.</th>
+                        <th>Статус</th>
+                        <th>Роль</th>
+                        <th>Подписка</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="user-list">
+                    <!-- Рендерится через JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Модальное окно ключа -->
+    <div class="modal-overlay" id="key-modal">
+        <div class="modal">
+            <h2>Генерация ключа</h2>
+            <p>Выберите срок подписки для ключа:</p>
+            <div class="modal-input-group">
+                <select id="key-days" style="flex: 1; padding: 14px; border-radius: 12px; background: rgba(0,0,0,0.5); color: white; border: 1px solid var(--accent); outline: none; font-family: var(--font-sans); font-size: 14px;">
+                    <option value="1">1 день</option>
+                    <option value="7">7 дней</option>
+                    <option value="30">30 дней</option>
+                    <option value="0">Lifetime</option>
+                </select>
+            </div>
+            <button onclick="generateKey()" style="width: 100%; margin-bottom: 10px;">Сгенерировать</button>
+            <div id="key-result" style="display: none; margin-bottom: 10px; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; border: 1px dashed var(--accent); font-family: monospace; font-size: 16px; font-weight: bold; letter-spacing: 2px; color: var(--accent); cursor: pointer;" onclick="copyKey()"></div>
+            <button onclick="closeKeyModal()" class="btn-gray" style="width: 100%;">Закрыть</button>
+        </div>
     </div>
 
     <script>
@@ -101,6 +188,7 @@
         const dbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let allUsers = [];
+        let currentRole = 'admin'; 
 
         function showMsg(text, type = 'success') {
             const box = document.getElementById('msg-box');
@@ -109,23 +197,15 @@
         }
 
         async function fetchUsers() {
-            // Проверка на админа
-            const { data: authData } = await dbClient.auth.getUser();
-            if (!authData.user) {
-                window.location.href = 'index.html'; return;
-            }
+            const { data: myData } = await dbClient.rpc('get_makcu_access', { p_user_id: localStorage.getItem('makcu_user') });
+            if (myData && myData.role) currentRole = myData.role;
 
-            const { data, error } = await dbClient.rpc('admin_list_users');
+            const { data, error } = await dbClient.rpc('admin_get_users');
             if (error) {
                 alert("Ошибка доступа. Убедитесь, что вы админ.");
                 window.location.href = 'index.html'; return;
             }
-            
-            // RPC возвращает массив объектов, но без username. Подтянем его из email
-            allUsers = (data || []).map(u => {
-                const name = u.email ? u.email.split('@')[0] : 'unknown';
-                return { ...u, username: name };
-            });
+            allUsers = data || [];
             renderList();
         }
 
@@ -141,42 +221,61 @@
                 u.username.toLowerCase().includes(search) || (u.hwid && u.hwid.toLowerCase().includes(search))
             );
 
-            filtered.forEach(u => {
+            filtered.forEach((u, index) => {
                 if (u.is_banned) banCount++;
                 else if (u.is_lifetime) lifeCount++;
                 else if (u.subscription_until && new Date(u.subscription_until) > now) activeCount++;
 
-                let badgeClass = 'expired', badgeText = 'Нет подписки', subText = '-';
-
-                if (u.is_banned) {
-                    badgeClass = 'banned'; badgeText = 'Забанен';
-                } else if (u.is_lifetime) {
-                    badgeClass = 'lifetime'; badgeText = 'Lifetime'; subText = 'Навсегда';
-                } else if (u.subscription_until && new Date(u.subscription_until) > now) {
+                let badgeClass = 'expired', badgeText = 'Нет', subText = '-';
+                if (u.is_banned) { badgeClass = 'banned'; badgeText = 'Бан'; }
+                else if (u.is_lifetime) { badgeClass = 'lifetime'; badgeText = 'Lifetime'; subText = 'Навсегда'; }
+                else if (u.subscription_until && new Date(u.subscription_until) > now) {
                     badgeClass = 'active'; badgeText = 'Активен';
                     subText = new Date(u.subscription_until).toLocaleDateString('ru-RU');
                 }
 
-                const row = document.createElement('div');
-                row.className = 'user-row';
+                const isFounder = u.role === 'founder';
+                const roleBadge = isFounder ? '<span class="badge founder">Founder</span>' : (u.role === 'admin' ? '<span class="badge admin">Admin</span>' : '<span style="color:var(--text-dim)">User</span>');
+                const date = u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : '-';
+
+                const banBtn = isFounder 
+                    ? `<button class="btn-sm btn-ban btn-disabled">Бан</button>` 
+                    : (u.is_banned 
+                        ? `<button class="btn-sm btn-unban" onclick="banUser('${u.id}', false)">Разбан</button>`
+                        : `<button class="btn-sm btn-ban" onclick="banUser('${u.id}', true)">Бан</button>`
+                    );
+                
+                const resetBtn = isFounder
+                    ? `<button class="btn-sm btn-ban btn-disabled">Сброс</button>`
+                    : `<button class="btn-sm btn-ban" onclick="resetHwid('${u.id}')">Сброс</button>`;
+
+                let roleBtn = '';
+                if (currentRole === 'founder' && !isFounder) {
+                    roleBtn = u.role === 'admin' 
+                        ? `<button class="btn-sm btn-gray" onclick="setRole('${u.id}', 'user')">Снять админа</button>`
+                        : `<button class="btn-sm" style="background:rgba(168, 85, 247, 0.2); border:1px solid #a855f7; color:#d8b4fe" onclick="setRole('${u.id}', 'admin')">Дать админа</button>`;
+                }
+
+                const row = document.createElement('tr');
+                row.style.animationDelay = `${index * 0.05}s`;
                 row.innerHTML = `
-                    <div class="u-info">
-                        <div class="u-name">${u.username}</div>
-                        <div class="u-hwid">${u.hwid || 'HWID: Не привязан'}</div>
-                    </div>
-                    <div class="u-status"><span class="badge ${badgeClass}">${badgeText}</span></div>
-                    <div class="u-sub">До: ${subText}</div>
-                    <div class="u-actions">
-                        <button class="btn-sm btn-gray" onclick="grantSub('${u.id}', 1)">+1д</button>
-                        <button class="btn-sm btn-gray" onclick="grantSub('${u.id}', 7)">+7д</button>
-                        <button class="btn-sm btn-gray" onclick="grantSub('${u.id}', 30)">+30д</button>
-                        <button class="btn-sm" style="background:#a855f7" onclick="grantSub('${u.id}', 0)">Life</button>
-                        ${u.is_banned 
-                            ? `<button class="btn-sm btn-unban" onclick="banUser('${u.id}', false)">Разбан</button>`
-                            : `<button class="btn-sm btn-ban" onclick="banUser('${u.id}', true)">Бан</button>`
-                        }
-                        <button class="btn-sm btn-ban" onclick="resetHwid('${u.id}')">Сброс HWID</button>
-                    </div>
+                    <td><b>${u.username}</b></td>
+                    <td><div class="u-hwid">${u.hwid || '<span style="color:#8a8a9e">Нет</span>'}</div></td>
+                    <td><div class="u-date">${date}</div></td>
+                    <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+                    <td>${roleBadge}</td>
+                    <td>${subText}</td>
+                    <td>
+                        <div class="u-actions">
+                            <button class="btn-sm btn-gray" onclick="grantSub('${u.id}', 1)">+1д</button>
+                            <button class="btn-sm btn-gray" onclick="grantSub('${u.id}', 7)">+7д</button>
+                            <button class="btn-sm btn-gray" onclick="grantSub('${u.id}', 30)">+30д</button>
+                            <button class="btn-sm" style="background:#a855f7" onclick="grantSub('${u.id}', 0)">Life</button>
+                            ${banBtn}
+                            ${resetBtn}
+                            ${roleBtn}
+                        </div>
+                    </td>
                 `;
                 list.appendChild(row);
             });
@@ -188,34 +287,63 @@
         }
 
         window.grantSub = async function(userId, days) {
-            const { data, error } = await dbClient.rpc('admin_grant_subscription', { p_user_id: userId, p_days: days });
-            if (error || !data.ok) return showMsg("Ошибка выдачи", "error");
+            const { error } = await dbClient.rpc('admin_grant_sub', { u_id: userId, days: days });
+            if (error) return showMsg("Ошибка выдачи", "error");
             showMsg(days === 0 ? "Выдан Lifetime" : `Выдано ${days} дней`);
             fetchUsers();
         };
 
         window.banUser = async function(userId, isBanned) {
-            const { data, error } = await dbClient.rpc('admin_set_ban', { p_user_id: userId, p_banned: isBanned, p_reason: isBanned ? 'Решение администратора' : null });
-            if (error || !data.ok) return showMsg("Ошибка бана", "error");
+            const { data, error } = await dbClient.rpc('admin_set_ban', { u_id: userId, banned: isBanned });
+            if (error || (data && !data.ok)) return showMsg("Ошибка: " + (data?.error || error?.message), "error");
             showMsg(isBanned ? "Юзер забанен" : "Юзер разбанен");
             fetchUsers();
         };
 
         window.resetHwid = async function(userId) {
             if (!confirm("Сбросить HWID этому юзеру?")) return;
-            // Прямой запрос (если разрешено RLS админу) или через RPC, если напишешь позже.
-            const { error } = await dbClient.from('profiles').update({ hwid: null }).eq('id', userId);
-            if (error) return showMsg("Ошибка сброса", "error");
+            const { data, error } = await dbClient.rpc('admin_reset_hwid', { u_id: userId });
+            if (error || (data && !data.ok)) return showMsg("Ошибка: " + (data?.error || error?.message), "error");
             showMsg("HWID сброшен");
             fetchUsers();
         };
 
-        window.generateKey = async function() {
-            const { data, error } = await dbClient.rpc('admin_create_invite', { p_max_uses: 1 });
-            if (error || !data) return showMsg("Ошибка генерации", "error");
-            showMsg(`Ключ: ${data} (Скопирован в консоль)`);
-            console.log(`%c[Ключ] ${data}`, 'color:#a855f7;font-size:16px;font-weight:bold;');
+        window.setRole = async function(userId, newRole) {
+            const { data, error } = await dbClient.rpc('admin_set_role', { u_id: userId, new_role: newRole });
+            if (error) return showMsg("Ошибка смены роли", "error");
+            showMsg("Роль обновлена");
+            fetchUsers();
         };
+
+        // --- Модальное окно ключей ---
+        window.openKeyModal = function() {
+            document.getElementById('key-modal').classList.add('active');
+            document.getElementById('key-result').style.display = 'none';
+        };
+
+        window.closeKeyModal = function() {
+            document.getElementById('key-modal').classList.remove('active');
+        };
+
+        window.generateKey = async function() {
+            const days = parseInt(document.getElementById('key-days').value);
+            const { data, error } = await dbClient.rpc('admin_create_key', { p_days: days });
+            if (error) return showMsg("Ошибка генерации", "error");
+            
+            const resBox = document.getElementById('key-result');
+            resBox.innerText = data;
+            resBox.style.display = 'block';
+        };
+
+        window.copyKey = function() {
+            const text = document.getElementById('key-result').innerText;
+            navigator.clipboard.writeText(text);
+            showMsg("Ключ скопирован");
+        };
+
+        document.getElementById('key-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'key-modal') closeKeyModal();
+        });
 
         fetchUsers();
     </script>
